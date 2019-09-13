@@ -4,9 +4,13 @@
 #'
 #' @param filepath, string. Full path to the input MGZ or MGH file.
 #'
-#' @param is_gzipped, a logical value (TRUE or FALSE) or the string 'AUTO'. Whether to treat the input file as gzipped, i.e., MGZ instead of MGH format. Defaults to 'AUTO', which tries to determine this from the last three characters of the 'filepath' parameter. Files with extensions 'mgz' and '.gz' (in arbitrary case) are treated as MGZ format, all other files are treated as MGH. In the special case that 'filepath' has less than three characters, MGZ is assumed.
+#' @param is_gzipped, a logical value (TRUE or FALSE) or the string 'AUTO'. Whether to treat the input file as gzipped, i.e., MGZ instead of MGH format. Defaults to 'AUTO', which tries to determine this from the last three characters of the 'filepath' parameter. Files with extensions 'mgz' and '.gz' (in arbitrary case) are treated as MGZ format, all other files are treated as MGH. In the special case that 'filepath' has less than three characters, MGH is assumed.
 #'
-#' @return data, multi-dimensional array. The brain imaging data, one value per voxel. The data type and the dimensions depend on the data in the file, they are read from the header.
+#' @param flatten, logical. Whether to flatten the return volume to a 1D vector. Useful if you know that this file contains 1D morphometry data.
+#'
+#' @param with_header, logical. Whether to return the header as well. If TRUE, return a named list with entries "data" and "header". The latter is another named list which contains the header data. These header entries exist: "dtype": int, one of: 0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT. "voldim": integer vector. The volume (=data) dimensions. E.g., c(256, 256, 256, 1). These header entries may exist: "vox2ras_matrix" (exists if "ras_good_flag" is 1), "mr_params" (exists if "has_mr_params" is 1).
+#'
+#' @return data, multi-dimensional array. The brain imaging data, one value per voxel. The data type and the dimensions depend on the data in the file, they are read from the header. If the parameter flatten is TRUE, a numeric vector is returned instead. Note: The return value changes if the parameter with_header is TRUE, see parameter description.
 #'
 #' @examples
 #'     brain_image = system.file("extdata", "brain.mgz",
@@ -17,25 +21,15 @@
 #'                  paste(dim(vd), collapse = ' '), min(vd), mean(vd), max(vd)));
 #'
 #' @export
-read.fs.mgh <- function(filepath, is_gzipped = "AUTO") {
+read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_header=FALSE) {
+
+    header = list();
 
     if(typeof(is_gzipped) == "logical") {
         is_gz = is_gzipped;
     } else if (typeof(is_gzipped) == "character") {
         if(is_gzipped == "AUTO") {
-            nc = nchar(filepath);
-            num_chars_to_inspect = 3; # last 3 chars
-            if(nc >= num_chars_to_inspect) {
-                ext = substr(filepath, nchar(filepath)-num_chars_to_inspect+1, nchar(filepath));
-                if(tolower(ext) == "mgz" || tolower(ext) == ".gz") {
-                    is_gz = TRUE;
-                } else {
-                    is_gz = FALSE;
-                }
-            } else {
-                warning(sprintf("Argument 'is_gzipped set' to 'AUTO' but file name is too short (%d chars) to determine compression from last %d characters, assuming gz-compressed file.\n", nc, num_chars_to_inspect));
-                is_gz = TRUE;
-            }
+            is_gz = guess.filename.is.gzipped(filepath);
         } else {
             stop("Argument 'is_gzipped' must be 'AUTO' if it is a string.\n");
         }
@@ -51,6 +45,9 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO") {
     }
 
     v = readBin(fh, integer(), n = 1, endian = "big");
+    if(v!=1L) {
+        stop("File not in MGH/MGZ format.");
+    }
     ndim1 = readBin(fh, integer(), n = 1, endian = "big");
     ndim2 = readBin(fh, integer(), n = 1, endian = "big");
     ndim3  = readBin(fh, integer(), n = 1, endian = "big");
@@ -58,47 +55,77 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO") {
     dtype = readBin(fh, integer(), n = 1, endian = "big");
     dof = readBin(fh, integer(), n = 1, endian = "big");
 
+    header$dtype = dtype;
+    header$dof = dof;
+
     unused_header_space_size_left = 256;
 
-    ras_good_flag = readBin(fh, numeric(), n = 1, endian = "big");
-    if(ras_good_flag == 1) {
-        delta  = readBin(fh, numeric(), n = 3, endian = "big");
-        Mdc    = readBin(fh, numeric(), n = 9, endian = "big");
-        Pxyz_c = readBin(fh, numeric(), n = 3, endian = "big");
-        RAS_space_size = (3*4 + 4*3*4);
+    header$ras_good_flag = readBin(fh, integer(), size = 2, n = 1, endian = "big");
+    if(header$ras_good_flag == 1) {
+        header$delta = readBin(fh, numeric(), n = 3, size = 4, endian = "big");
+        header$Mdc = readBin(fh, numeric(), n = 9, size = 4, endian = "big");
+        header$Mdc = matrix(header$Mdc, nrow=3, byrow = FALSE);
+        header$Pxyz_c = readBin(fh, numeric(), n = 3, size = 4, endian = "big");
+
+        D = diag(header$delta);
+        Pcrs_c = c(ndim1/2, ndim2/2, ndim3/2);
+        Pxyz_0 = header$Pxyz_c - ((header$Mdc %*% D) %*% Pcrs_c);
+
+        blah = header$Mdc %*% D;
+
+        M = matrix(rep(0, 16), nrow=4);
+        M[1:3,1:3] = blah;
+        M[4,1:4] = c(0,0,0,1);
+        M[1:3,4] = Pxyz_0;
+
+        ras_xform = matrix(rep(0, 16), nrow=4);
+        ras_xform[1:3,1:3] = header$Mdc;
+        ras_xform[4,1:4] = c(0,0,0,1);
+        ras_xform[1:3,4] = header$Pxyz_c;
+
+        header$D = D;
+        header$Pcrs_c = Pcrs_c;
+        header$Pxyz_0 = Pxyz_0;
+        header$M = M;
+        header$vox2ras_matrix = M;
+        header$ras_xform = ras_xform;
+
+        RAS_space_size = (3*4 + 4*3*4);    # 60 bytes
         unused_header_space_size_left = unused_header_space_size_left - RAS_space_size;
     }
 
     # Skip to end of header/beginning of data
-    seek(fh, where = unused_header_space_size_left, origin = "current");
+    seek(fh, where = unused_header_space_size_left - 2, origin = "current");
 
     nv = ndim1 * ndim2 * ndim3 * nframes;   # number of voxels
     volsz = c(ndim1, ndim2, ndim3, nframes);
+    header$voldim = volsz;
 
     # Determine size of voxel data, depending on dtype from header above
-    MRI_UCHAR = 0;
-    MRI_INT = 1;
-    MRI_FLOAT = 3;
-    MRI_SHORT = 4;
+    MRI_UCHAR = 0L;
+    MRI_INT = 1L;
+    MRI_FLOAT = 3L;
+    MRI_SHORT = 4L;
 
-    dt_explanation = "0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 3=MRI_SHORT";
+    dt_explanation = "0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT";
 
     # Determine number of bytes per voxel
     if(dtype == MRI_FLOAT) {
-        nbytespervox = 4;
+        nbytespervox = 4L;
         data = readBin(fh, numeric(), size = nbytespervox, n = nv, endian = "big");
     } else if(dtype == MRI_UCHAR) {
-        nbytespervox = 1;
+        nbytespervox = 1L;
         data = readBin(fh, integer(), size = nbytespervox, n = nv, signed = FALSE, endian = "big");
     } else if (dtype == MRI_SHORT) {
-        nbytespervox = 2;
+        nbytespervox = 2L;
         data = readBin(fh, integer(), size = nbytespervox, n = nv, endian = "big");
     } else if (dtype == MRI_INT) {
-        nbytespervox = 4;
+        nbytespervox = 4L;
         data = readBin(fh, integer(), size = nbytespervox, n = nv, endian = "big");
     } else {
        stop(sprintf(" ERROR: Unexpected data type found in header. Expected one of {0, 1, 3, 4} (%s) but got %d.\n", dt_explanation, dtype));
     }
+    header$nbytespervox = nbytespervox;
 
     num_read = prod(length(data));
     if (num_read != nv) {
@@ -107,6 +134,54 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO") {
 
     # Reshape to expected dimensions
     data = array(data, dim = c(ndim1, ndim2, ndim3, nframes));
+
+    if(flatten) {
+        dim(data) = c(nv);
+        data = as.vector(unlist(data));
+        header$voldim = c(length(data));
+    }
+
+    header$has_mr_params = 0;
+    if(with_header) {
+        # Read the mr_params footer behind the data. The mr_params footer is optional, so we do not care if reading it fails.
+        ignored = tryCatch({
+            header$mr_params  = readBin(fh, numeric(), n = 4, size = 4, endian = "big");
+            header$has_mr_params = 1;
+        }, error=function(e){}, warning=function(w){});
+    }
+
     close(fh);
+    if(with_header) {
+        return_list = list();
+        return_list$header = header;
+        return_list$data = data;
+        return(return_list);
+    }
     return(data);
+}
+
+
+#' @title Guess whether a file is gzipped.
+#'
+#' @description Guess whether a file is gzipped, based on the file extension.
+#'
+#' @param filepath, string. Path to a file.
+#'
+#' @param gz_entensions, list of strings. A list of suffixes that is considered indicative for the file being gzipped. Defaults to c(".gz", ".mgz"). Case does not matter.
+#'
+#' @return logical, whether this function thinks the file is gzipped.
+#'
+#' @keywords internal
+guess.filename.is.gzipped <- function(filepath, gz_entensions=c(".gz", ".mgz")) {
+    nc = nchar(filepath);
+    for (gz_ext in gz_entensions) {
+        num_chars_to_inspect = nchar(gz_ext);
+        if(nc >= num_chars_to_inspect) {
+            ext = substr(filepath, nchar(filepath)-num_chars_to_inspect+1, nchar(filepath));
+            if(tolower(ext) == tolower(gz_ext)) {
+                return(TRUE);
+            }
+        }
+    }
+    return(FALSE);
 }
