@@ -86,3 +86,18 @@
     thickness_in_region = thickness_native[annot$label_names == region]
     cat(sprintf("Region '%s' has %d vertices and a mean cortical thickness of %f mm.\n", region, length(thickness_in_region), mean(thickness_in_region)));
 
+## ------------------------------------------------------------------------
+    surface_file = system.file("extdata", "lh.tinysurface", package = "freesurferformats", mustWork = TRUE);
+    surf = read.fs.surface(surface_file);
+    cat(sprintf("Loaded surface consisting of %d vertices and %d faces.\n", nrow(surf$vertices), nrow(surf$faces)));
+
+## ------------------------------------------------------------------------
+    vertex_index = 5;
+    v5 = surf$vertices[vertex_index];
+    cat(sprintf("Vertex %d has coordinates (%f, %f, %f).\n", vertex_index, v5[1], v5[2], v5[3]));
+
+## ------------------------------------------------------------------------
+    face_index = 2;
+    f2 = surf$faces[face_index];
+    cat(sprintf("Face %d consistes of the vertices %d, %d, and %d.\n", face_index, f2[1], f2[2], f2[3]));
+

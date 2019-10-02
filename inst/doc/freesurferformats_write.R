@@ -21,3 +21,9 @@
 #      curvfile = "mystudy/subject1/surf/lh.random"
 #      write.fs.curv(curvfile, data);
 
+## ---- eval = FALSE-------------------------------------------------------
+#      vertices = matrix(rep(0.3, 15), nrow=3);     # 5 vertices
+#      faces = matrix(c(1L,2L,3L,2L,4L,3L,4L,5L,3L), nrow=3, byrow = TRUE);   # 3 faces
+#  
+#      write.fs.surface(tempfile(fileext="white"), vertices, faces);
+

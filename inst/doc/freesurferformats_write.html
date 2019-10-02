@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -94,7 +95,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -349,8 +350,20 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb4-3" data-line-number="3">    <span class="kw">write.fs.curv</span>(curvfile, data);</a></code></pre></div>
 <p>It’s worth knowing the if your filename ends with <code>.gz</code>, the file will be written in gzip format.</p>
 </div>
+<div id="writing-surface-format-files" class="section level2">
+<h2>Writing surface format files</h2>
+<p>You can use <code>write.fs.surface</code> to write triangular meshes in binary surface format (the format used for files like ‘surf/lh.white’ or ‘surf/rh.pial’). A mesh is defined by a list of vertices and a list of faces.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">    vertices =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(<span class="fl">0.3</span>, <span class="dv">15</span>), <span class="dt">nrow=</span><span class="dv">3</span>);     <span class="co"># 5 vertices</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">    faces =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(1L,2L,3L,2L,4L,3L,4L,5L,3L), <span class="dt">nrow=</span><span class="dv">3</span>, <span class="dt">byrow =</span> <span class="ot">TRUE</span>);   <span class="co"># 3 faces</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">    <span class="kw">write.fs.surface</span>(<span class="kw">tempfile</span>(<span class="dt">fileext=</span><span class="st">&quot;white&quot;</span>), vertices, faces);</a></code></pre></div>
+<p>The vertex indices used to define the faces should be 1-based, as used in R. They will be written 0-based to the file.</p>
+</div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

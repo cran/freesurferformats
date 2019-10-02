@@ -11,6 +11,12 @@ test_that("Our demo annotation file can be read", {
     expect_equal(annot$colortable$struct_names[1], "unknown")
     expect_equal(annot$colortable$struct_names[2], "bankssts")
     expect_equal(annot$colortable$struct_names[3], "caudalanteriorcingulate")
+    expect_equal(annot$colortable$struct_names[4], "caudalmiddlefrontal")
+    expect_equal(annot$colortable$struct_names[5], "corpuscallosum")
+    expect_equal(annot$colortable$struct_names[6], "cuneus")
+    expect_equal(annot$colortable$struct_names[33], "frontalpole")
+    expect_equal(annot$colortable$struct_names[34], "temporalpole")
+    expect_equal(annot$colortable$struct_names[35], "transversetemporal")
     expect_equal(annot$colortable$struct_names[36], "insula")
     expect_equal(ncol(annot$colortable$table), 5)
     expect_equal(nrow(annot$colortable$table), 36)
@@ -45,4 +51,23 @@ test_that("Our demo annotation file can be read", {
     thickness_in_bankssts = thickness[annot$label_names == "bankssts"]
     expect_equal(length(thickness_in_bankssts), 1722)
     expect_equal(mean(thickness_in_bankssts), 2.49, tolerance=1e-2)
+
+    # Test colortable_df
+    cdf = annot$colortable_df;
+    expect_equal(class(cdf), "data.frame");
+    expect_equal(nrow(cdf), 36);
+    expect_equal(ncol(cdf), 8);
+    column_names = colnames(cdf);
+    expect_true("struct_name" %in% column_names);
+    expect_true("r" %in% column_names);
+    expect_true("g" %in% column_names);
+    expect_true("b" %in% column_names);
+    expect_true("a" %in% column_names);
+    expect_true("code" %in% column_names);
+    expect_true("hex_color_string_rgb" %in% column_names);
+    expect_true("hex_color_string_rgba" %in% column_names);
+
+    expect_equal(typeof(annot$hex_colors_rgb), "character")
+    expect_equal(length(annot$hex_colors_rgb), known_vertex_count)
  })
+

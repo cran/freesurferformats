@@ -5,8 +5,10 @@
 #'
 #' @param filepath, string. Full path to the input annotation file. Note: gzipped files are supported and gz format is assumed if the filepath ends with ".gz".
 #'
+#' @param empty_label_name, string. The region name to assign to regions with empty name. Defaults to 'unknown'. Set to NULL if you want to keep the empty region name.
+#'
 #' @return named list, enties are: "vertices" vector of n vertex indices, starting with 0. "label_codes": vector of n integers, each entry is a color code, i.e., a value from the 5th column in the table structure included in the "colortable" entry (see below). "label_names": the n brain structure names for the vertices, already retrieved from the colortable using the code.
-#'      The "colortable" is another named list with 3 entries: "num_entries": int, number of brain structures. "struct_names": vector of strings, the brain structure names. "table": numeric matrix with num_entries rows and 5 colums. The 5 columns are: 1 = color red channel, 2=color blue channel, 3=color green channel, 4=color alpha channel, 5=unique color code.
+#'      The "colortable" is another named list with 3 entries: "num_entries": int, number of brain structures. "struct_names": vector of strings, the brain structure names. "table": numeric matrix with num_entries rows and 5 colums. The 5 columns are: 1 = color red channel, 2=color blue channel, 3=color green channel, 4=color alpha channel, 5=unique color code. "colortable_df": The same information as a dataframe. Contains the extra columns "hex_color_string_rgb" and "hex_color_string_rgba" that hold the color as an RGB(A) hex string, like "#rrggbbaa".
 #'
 #' @examples
 #'     annot_file = system.file("extdata", "lh.aparc.annot.gz",
@@ -15,7 +17,7 @@
 #'     annot = read.fs.annot(annot_file);
 #'
 #' @export
-read.fs.annot <- function(filepath) {
+read.fs.annot <- function(filepath, empty_label_name="unknown") {
 
     if(guess.filename.is.gzipped(filepath)) {
         fh = gzfile(filepath, "rb");
@@ -53,14 +55,29 @@ read.fs.annot <- function(filepath) {
                 b = colortable$table[,3];
                 a = colortable$table[,4];
                 code = colortable$table[,5];
-                colortable_df = data.frame(struct_names, r, g, b, a, code);
+                hex_color_string_rgb = grDevices::rgb(r/255., g/255., b/255.);
+                hex_color_string_rgba = grDevices::rgb(r/255., g/255., b/255., a/255);
+                colortable_df = data.frame(struct_names, r, g, b, a, code, hex_color_string_rgb, hex_color_string_rgba);
+                colnames(colortable_df) = c("struct_name", "r", "g", "b", "a", "code", "hex_color_string_rgb", "hex_color_string_rgba");
+                return_list$colortable_df = colortable_df;
 
                 label_names = rep("", length(labels))
+                hex_colors_rgb = rep("#333333", length(labels))
+                nempty = 1;  # There could be more than 1 empty region, and we cannot match all of them to the same name.
                 for (i in 1:length(colortable$struct_names)) {
                     label_code = code[i];
-                    label_names[labels==label_code] = colortable$struct_names[i];
+                    label_name = colortable$struct_names[i];
+                    hex_color_string_rgb = grDevices::rgb(colortable$table[i,1]/255., colortable$table[i,2]/255., colortable$table[i,3]/255.);
+                    if(nchar(empty_label_name) > 0 && nchar(label_name) == 0) {
+                        cat(sprintf("Replacing empty label name with '%s'\n", empty_label_name));
+                        label_name = paste(empty_label_name, nempty, sep="");
+                        nempty = nempty + 1;
+                    }
+                    label_names[labels==label_code] = label_name;
+                    hex_colors_rgb[labels==label_code] = hex_color_string_rgb;
                 }
                 return_list$label_names = label_names;
+                return_list$hex_colors_rgb = hex_colors_rgb;
             }
             else {
                 stop(sprintf("Unsupported annotation file version '%d'.", version));
@@ -80,7 +97,9 @@ read.fs.annot <- function(filepath) {
 #'
 #' @description Read a v2 format colortable from a connection to a binary file.
 #'
-#' @param filehandle: file handle
+#' @param fh: file handle
+#'
+#' @param ctable_num_entries: number of entries to read
 #'
 #' @return named list: the color table. The named entries are: "num_entries": int, number of brain structures. "struct_names": vector of strings, the brain structure names. "table": numeric matrix with num_entries rows and 5 colums. The 5 columns are: 1 = color red channel, 2=color blue channel, 3=color green channel, 4=color alpha channel, 5=unique color code.
 #'
@@ -100,6 +119,9 @@ readcolortable <- function(fh, ctable_num_entries) {
 
     # There is another field here which also encodes the number of entries.
     ctable_num_entries_2nd = readBin(fh, integer(), n = 1, endian = "big");
+    if(ctable_num_entries != ctable_num_entries_2nd) {
+      warning(sprintf("Meta data on number of color table mismatches: %d versus %d.\n", ctable_num_entries, ctable_num_entries_2nd));
+    }
     for (i in 1:ctable_num_entries) {
         struct_idx = readBin(fh, integer(), n = 1, endian = "big") + 1;
 
@@ -133,3 +155,4 @@ readcolortable <- function(fh, ctable_num_entries) {
 
     return(colortable);
 }
+
