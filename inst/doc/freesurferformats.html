@@ -370,6 +370,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h3>Hint: Further image processing and visualization for volumes</h3>
 <p>If all you need is to perform statistical analysis of the data in the MGH file, you are ready to do that after loading. If you need access to more image operations, I would recommend to convert the data to a NIFTI object. E.g., if you have <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti</a> installed, you could visualize the <code>brain</code> data we loaded earlier like this:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">    oro.nifti<span class="op">::</span><span class="kw">orthographic</span>(oro.nifti<span class="op">::</span><span class="kw">nifti</span>(brain))</a></code></pre></div>
+<p>If you need advanced visualization, including the option to render morphometry data or annotation on 3D brain surface meshes, you can have a look at the <a href="https://github.com/dfsp-spirit/fsbrain">fsbrain package</a>.</p>
 </div>
 </div>
 <div id="reading-curv-format-files" class="section level2">
@@ -480,15 +481,24 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <pre><code>## Loaded surface consisting of 5 vertices and 3 faces.</code></pre>
 <p>Now we can print the coordinates of vertex 5:</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">    vertex_index =<span class="st"> </span><span class="dv">5</span>;</a>
-<a class="sourceLine" id="cb30-2" data-line-number="2">    v5 =<span class="st"> </span>surf<span class="op">$</span>vertices[vertex_index];</a>
+<a class="sourceLine" id="cb30-2" data-line-number="2">    v5 =<span class="st"> </span>surf<span class="op">$</span>vertices[vertex_index,];</a>
 <a class="sourceLine" id="cb30-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex %d has coordinates (%f, %f, %f).</span><span class="ch">\n</span><span class="st">&quot;</span>, vertex_index, v5[<span class="dv">1</span>], v5[<span class="dv">2</span>], v5[<span class="dv">3</span>]));</a></code></pre></div>
-<pre><code>## Vertex 5 has coordinates (0.300000, NA, NA).</code></pre>
+<pre><code>## Vertex 5 has coordinates (0.300000, 0.300000, 0.300000).</code></pre>
 <p>And also the 3 vertices that make up face 2:</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">    face_index =<span class="st"> </span><span class="dv">2</span>;</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">    f2 =<span class="st"> </span>surf<span class="op">$</span>faces[face_index];</a>
+<a class="sourceLine" id="cb32-2" data-line-number="2">    f2 =<span class="st"> </span>surf<span class="op">$</span>faces[face_index,];</a>
 <a class="sourceLine" id="cb32-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Face %d consistes of the vertices %d, %d, and %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, face_index, f2[<span class="dv">1</span>], f2[<span class="dv">2</span>], f2[<span class="dv">3</span>]));</a></code></pre></div>
-<pre><code>## Face 2 consistes of the vertices 2, NA, and NA.</code></pre>
+<pre><code>## Face 2 consistes of the vertices 2, 4, and 5.</code></pre>
 <p>Note that the vertex indices start with 1 in GNU R. The vertex indices in the file are 0-based, but this is handled transparently by the ‘read.fs.surface’ and ‘write.fs.surface’ functions.</p>
+</div>
+<div id="reading-labels" class="section level2">
+<h2>Reading labels</h2>
+<p>A label defines a list of vertices (of an associated surface or morphometry file) which are part of it. All others are not. You can think of it as binary mask. An atlas or annotation can be thought of as a list of labels, each of which defines a single brain region (the annotation also contains a colormap for the regions). Labels are useful to extract or mask out certain brain regions. E.g., you may want to exclude the medial wall from your analysis, of you may only be interested in a certain brain region.</p>
+<p>The following example reads a label file:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1">    labelfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.entorhinal_exvivo.label&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
+<a class="sourceLine" id="cb34-2" data-line-number="2">    label =<span class="st"> </span><span class="kw">read.fs.label</span>(labelfile);</a>
+<a class="sourceLine" id="cb34-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;The label consists of %d vertices, the first one is vertex %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">length</span>(label), label[<span class="dv">1</span>]));</a></code></pre></div>
+<pre><code>## The label consists of 1085 vertices, the first one is vertex 88792.</code></pre>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
@@ -501,6 +511,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <ul>
 <li>The <a href="https://CRAN.R-project.org/package=freesurfer">freesurfer package by John Muschelli</a> implements an R wrapper around some FreeSurfer command line utilities. This includes functions to read MGH/MGZ files by converting them to NIFTI format using command line utilities that come with FreeSurfer, then loading the resulting NIFTI file with the <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti package</a>. As such, the package requires that you have FreeSurfer installed.</li>
 <li>Several packages exist that read files in NIFTI format, including <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti</a> and <a href="https://CRAN.R-project.org/package=RNifti">RNifti</a></li>
+<li>My <a href="https://github.com/dfsp-spirit/fsbrain">fsbrain package</a> provides an abstraction layer around fresurferformats. It is desingned to quickly access data from single subjects or groups stored in the standardized output directory structure used by FreeSurfer and recon-all. The package fsbrain also includes advanced visualization functions for surface-based data.</li>
 </ul>
 </div>
 </div>

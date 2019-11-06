@@ -11,6 +11,7 @@
 #'
 #' @return string, the format that was written. One of "tris" or "quads". Currently only triangular meshes are supported, so always 'tris'.
 #'
+#' @family mesh functions
 #'
 #' @export
 write.fs.surface <- function(filepath, vertex_coords, faces) {
@@ -49,10 +50,10 @@ write.fs.surface <- function(filepath, vertex_coords, faces) {
     writeBin(as.integer(num_faces), fh, size = 4, endian = "big");
 
     # write the data itself: vertex coords
-    writeBin(as.vector(vertex_coords), fh, size = 4, endian = "big");
+    writeBin(c(t(vertex_coords)), fh, size = 4, endian = "big");
 
     # write vertex indices making up a face
-    writeBin(as.vector(faces), fh, size = 4, endian = "big");
+    writeBin(c(t(faces)), fh, size = 4, endian = "big");
     close(fh);
   } else if (ncol(faces) == 4) {
     MAGIC_FILE_TYPE_NUMBER = QUAD_MAGIC_FILE_TYPE_NUMBER;

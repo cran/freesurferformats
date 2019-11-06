@@ -1,13 +1,12 @@
 #' @title Read file in FreeSurfer surface format
 #'
-#' @description Read vertex and face data  from a file in FreeSurfer binary surface format. For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.white'.
-#'              For a quick preview: library(rgl); mesh = tmesh3d(unlist(surf$vertices), unlist(surf$faces), homogeneous=FALSE); rgl.open(); wire3d(mesh);
-#'
-#'              col = rep("red", nrow(surf$vertices)); col[1:20000] = "blue"; wire3d(mesh, col=col, meshcolor="vertices");
+#' @description Read a brain surface mesh consisting of vertex and face data from a file in FreeSurfer binary surface format. For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.white'.
 #'
 #' @param filepath, string. Full path to the input curv file. Note: gzipped files are supported and gz format is assumed if the filepath ends with ".gz".
 #'
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software. "vertex_indices_fs": list of n integers, where n is the number of vertices. The FreeSurfer vertex indices for the vertices.
+#'
+#' @family mesh functions
 #'
 #' @examples
 #'     surface_file = system.file("extdata", "lh.tinysurface",
@@ -46,7 +45,7 @@ read.fs.surface <- function(filepath) {
     num_vertex_coords = num_vertices * 3L;
     vertex_coords = readBin(fh, integer(), size=2L, n = num_vertex_coords, endian = "big");
     vertex_coords = vertex_coords / 100.;
-    vertices = matrix(vertex_coords, nrow=num_vertices, ncol=3L);
+    vertices = matrix(vertex_coords, nrow=num_vertices, ncol=3L, byrow = TRUE);
 
     if(length(vertex_coords) != num_vertex_coords) {
       stop(sprintf("Mismatch in read vertex coordinates: expected %d but received %d.\n", num_vertex_coords, length(vertex_coords)));
@@ -54,7 +53,7 @@ read.fs.surface <- function(filepath) {
 
     num_face_vertex_indices = num_faces * 4L;
     face_vertex_indices = rep(0, num_face_vertex_indices);
-    faces = matrix(face_vertex_indices, nrow=num_faces, ncol=4L)
+    faces = matrix(face_vertex_indices, nrow=num_faces, ncol=4L, byrow = TRUE)
     for (face_idx in 1L:num_faces) {
       for (vertex_idx_in_face in 1L:4L) {
         global_vertex_idx = fread3(fh);
@@ -86,7 +85,7 @@ read.fs.surface <- function(filepath) {
 
     num_vertex_coords = num_vertices * 3L;
     vertex_coords = readBin(fh, numeric(), size = 4L, n = num_vertex_coords, endian = "big");          # a vertex is made up of 3 float coordinates (x,y,z)
-    vertices = matrix(vertex_coords, nrow=num_vertices, ncol=3L);
+    vertices = matrix(vertex_coords, nrow=num_vertices, ncol=3L, byrow = TRUE);
 
     if(length(vertex_coords) != num_vertex_coords) {
       stop(sprintf("Mismatch in read vertex coordinates: expected %d but received %d.\n", num_vertex_coords, length(vertex_coords)));
@@ -94,7 +93,7 @@ read.fs.surface <- function(filepath) {
 
     num_face_vertex_indices = num_faces * 3L;
     face_vertex_indices = readBin(fh, integer(), size = 4L, n = num_face_vertex_indices, endian = "big");   # a face is made of of 3 integers, which are vertex indices
-    faces = matrix(face_vertex_indices, nrow=num_faces, ncol=3L);
+    faces = matrix(face_vertex_indices, nrow=num_faces, ncol=3L, byrow = TRUE);
     faces = faces + 1L;    # Increment indices by 1: GNU R uses 1-based indices.
 
     if(length(face_vertex_indices) != num_face_vertex_indices) {

@@ -93,11 +93,16 @@
 
 ## ------------------------------------------------------------------------
     vertex_index = 5;
-    v5 = surf$vertices[vertex_index];
+    v5 = surf$vertices[vertex_index,];
     cat(sprintf("Vertex %d has coordinates (%f, %f, %f).\n", vertex_index, v5[1], v5[2], v5[3]));
 
 ## ------------------------------------------------------------------------
     face_index = 2;
-    f2 = surf$faces[face_index];
+    f2 = surf$faces[face_index,];
     cat(sprintf("Face %d consistes of the vertices %d, %d, and %d.\n", face_index, f2[1], f2[2], f2[3]));
+
+## ------------------------------------------------------------------------
+    labelfile = system.file("extdata", "lh.entorhinal_exvivo.label", package = "freesurferformats", mustWork = TRUE);
+    label = read.fs.label(labelfile);
+    cat(sprintf("The label consists of %d vertices, the first one is vertex %d.\n", length(label), label[1]));
 
