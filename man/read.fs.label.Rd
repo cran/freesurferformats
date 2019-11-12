@@ -7,9 +7,9 @@
 read.fs.label(filepath, return_one_based_indices = TRUE)
 }
 \arguments{
-\item{filepath, }{string. Full path to the input label file.}
+\item{filepath}{string. Full path to the input label file.}
 
-\item{return_one_based_indices, }{logical. Whether the indices should be 1-based. Indices are stored zero-based in the file, but R uses 1-based indices. Defaults to TRUE, which means that 1 will be added to all indices read from the file before returning them.}
+\item{return_one_based_indices}{logical. Whether the indices should be 1-based. Indices are stored zero-based in the file, but R uses 1-based indices. Defaults to TRUE, which means that 1 will be added to all indices read from the file before returning them.}
 }
 \value{
 vector of integers. The vertex indices from the label file. See the parameter 'return_one_based_indices' for important information regarding the start index.
@@ -17,5 +17,14 @@ vector of integers. The vertex indices from the label file. See the parameter 'r
 \description{
 Read a mask in FreeSurfer label format.
    A label defines a list of vertices (of an associated surface or morphometry file) which are part of it. All others are not. You can think of it as binary mask. Label files are ASCII text files, which have 5 columns (vertex index, coord1, coord2, coord3, value), but only the vertex indices are of interest.
+}
+\examples{
+    labelfile = system.file("extdata", "lh.entorhinal_exvivo.label",
+      package = "freesurferformats", mustWork = TRUE);
+    label = read.fs.label(labelfile);
+
+}
+\seealso{
+Other label functions: \code{\link{write.fs.label}}
 }
 \concept{label functions}
