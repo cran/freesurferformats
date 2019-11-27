@@ -359,6 +359,26 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb5-4" data-line-number="4">    <span class="kw">write.fs.surface</span>(<span class="kw">tempfile</span>(<span class="dt">fileext=</span><span class="st">&quot;white&quot;</span>), vertices, faces);</a></code></pre></div>
 <p>The vertex indices used to define the faces should be 1-based, as used in R. They will be written 0-based to the file.</p>
 </div>
+<div id="writing-label-files" class="section level2">
+<h2>Writing label files</h2>
+<p>Labels can be written with the <code>write.fs.label</code> function. A label is nothing but a list of vertex indices.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">output_file =<span class="st"> </span><span class="kw">tempfile</span>();</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co"># generate data</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">vertex_indices =<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">10000</span>, <span class="dt">to=</span><span class="dv">20000</span>);</a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co"># write label to file</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="kw">write.fs.label</span>(output_file, vertex_indices);</a></code></pre></div>
+</div>
+<div id="writing-color-lookup-table-lut-files-in-ascii-format" class="section level2">
+<h2>Writing color lookup table (LUT) files in ASCII format</h2>
+<p>The following example uses the <code>write.fs.colortable</code> function to write a colortable:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">colortable_df =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">&quot;struct_index&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="st">&quot;struct_name&quot;</span>=<span class="kw">c</span>(<span class="st">&quot;struct1&quot;</span>, <span class="st">&quot;struct2&quot;</span>),</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">                  <span class="st">&quot;r&quot;</span>=<span class="kw">c</span>(<span class="dv">80</span>, <span class="dv">100</span>), <span class="st">&quot;g&quot;</span>=<span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">40</span>), <span class="st">&quot;b&quot;</span>=<span class="kw">c</span>(<span class="dv">250</span>, <span class="dv">200</span>), <span class="st">&quot;a&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>);</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">output_file =<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.txt&quot;</span>);</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="kw">write.fs.colortable</span>(output_file, colortable_df);</a></code></pre></div>
+</div>
 </div>
 
 

@@ -27,3 +27,19 @@
 #  
 #      write.fs.surface(tempfile(fileext="white"), vertices, faces);
 
+## ---- eval = FALSE-------------------------------------------------------
+#  output_file = tempfile();
+#  
+#  # generate data
+#  vertex_indices = seq(from = 10000, to=20000);
+#  
+#  # write label to file
+#  write.fs.label(output_file, vertex_indices);
+
+## ---- eval = FALSE-------------------------------------------------------
+#  colortable_df = data.frame("struct_index"=c(0, 1), "struct_name"=c("struct1", "struct2"),
+#                    "r"=c(80, 100), "g"=c(50, 40), "b"=c(250, 200), "a"=c(0, 0), stringsAsFactors = FALSE);
+#  
+#  output_file = tempfile(fileext = ".txt");
+#  write.fs.colortable(output_file, colortable_df);
+

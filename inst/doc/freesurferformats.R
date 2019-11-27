@@ -106,3 +106,14 @@
     label = read.fs.label(labelfile);
     cat(sprintf("The label consists of %d vertices, the first one is vertex %d.\n", length(label), label[1]));
 
+## ------------------------------------------------------------------------
+lutfile = system.file("extdata", "colorlut.txt", package = "freesurferformats", mustWork = TRUE);
+colortable = read.fs.colortable(lutfile, compute_colorcode=TRUE);
+head(colortable);
+
+## ------------------------------------------------------------------------
+annotfile = system.file("extdata", "lh.aparc.annot.gz", package = "freesurferformats", mustWork = TRUE);
+annot = read.fs.annot(annotfile);
+colortable = colortable.from.annot(annot);
+head(colortable);
+

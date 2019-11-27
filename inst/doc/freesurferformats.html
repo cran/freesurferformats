@@ -500,6 +500,36 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb34-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;The label consists of %d vertices, the first one is vertex %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">length</span>(label), label[<span class="dv">1</span>]));</a></code></pre></div>
 <pre><code>## The label consists of 1085 vertices, the first one is vertex 88792.</code></pre>
 </div>
+<div id="reading-color-lookup-tables-lut-files" class="section level2">
+<h2>Reading color lookup tables (LUT files)</h2>
+<p>A colortable assigns a name and an RGBA color to a set of labels. Such a colortable is included in an annotation (brain atlas), but there also is a separate ASCII text file format for these LUTs. An example file in the format is <code>FREESURFER_HOME/FreeSurferColorLUT.txt</code>. To read such a file:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1">lutfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;colorlut.txt&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
+<a class="sourceLine" id="cb36-2" data-line-number="2">colortable =<span class="st"> </span><span class="kw">read.fs.colortable</span>(lutfile, <span class="dt">compute_colorcode=</span><span class="ot">TRUE</span>);</a>
+<a class="sourceLine" id="cb36-3" data-line-number="3"><span class="kw">head</span>(colortable);</a></code></pre></div>
+<pre><code>##   struct_index                struct_name   r   g   b a     code
+## 1            0                    Unknown   0   0   0 0        0
+## 2            1     Left-Cerebral-Exterior  70 130 180 0 11829830
+## 3            2 Left-Cerebral-White-Matter 245 245 245 0 16119285
+## 4            3       Left-Cerebral-Cortex 205  62  78 0  5127885
+## 5            4     Left-Lateral-Ventricle 120  18 134 0  8786552
+## 6            5          Left-Inf-Lat-Vent 196  58 250 0 16399044</code></pre>
+<p>You can also extract such a colortable from an annotation:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1">annotfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.aparc.annot.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
+<a class="sourceLine" id="cb38-2" data-line-number="2">annot =<span class="st"> </span><span class="kw">read.fs.annot</span>(annotfile);</a>
+<a class="sourceLine" id="cb38-3" data-line-number="3">colortable =<span class="st"> </span><span class="kw">colortable.from.annot</span>(annot);</a>
+<a class="sourceLine" id="cb38-4" data-line-number="4"><span class="kw">head</span>(colortable);</a></code></pre></div>
+<pre><code>##   struct_index             struct_name   r   g   b a
+## 1            0                 unknown  25   5  25 0
+## 2            1                bankssts  25 100  40 0
+## 3            2 caudalanteriorcingulate 125 100 160 0
+## 4            3     caudalmiddlefrontal 100  25   0 0
+## 5            4          corpuscallosum 120  70  50 0
+## 6            5                  cuneus 220  20 100 0</code></pre>
+<div id="computing-the-unique-color-codes" class="section level3">
+<h3>Computing the unique color codes</h3>
+<p>Some functions in FreeSurfer identify the regions by an internal code code that is computed from the RGBA values of the colors. These values are <em>not</em> included in the colortable, they need to be computed. You can pass the optional argument <code>compute_colorcode=TRUE</code> to the LUT functions if you want them to compute the color codes and add the colorcode to the returned dataframe in a column named ‘code’.</p>
+</div>
+</div>
 <div id="references" class="section level2">
 <h2>References</h2>
 <ul>
@@ -510,8 +540,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Alternatives, similar and related Packages</h2>
 <ul>
 <li>The <a href="https://CRAN.R-project.org/package=freesurfer">freesurfer package by John Muschelli</a> implements an R wrapper around some FreeSurfer command line utilities. This includes functions to read MGH/MGZ files by converting them to NIFTI format using command line utilities that come with FreeSurfer, then loading the resulting NIFTI file with the <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti package</a>. As such, the package requires that you have FreeSurfer installed.</li>
-<li>Several packages exist that read files in NIFTI format, including <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti</a> and <a href="https://CRAN.R-project.org/package=RNifti">RNifti</a></li>
+<li>Several packages exist that read files in NIFTI format, including <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti</a> and <a href="https://CRAN.R-project.org/package=RNifti">RNifti</a>.</li>
 <li>My <a href="https://github.com/dfsp-spirit/fsbrain">fsbrain package</a> provides an abstraction layer around fresurferformats. It is desingned to quickly access data from single subjects or groups stored in the standardized output directory structure used by FreeSurfer and recon-all. The package fsbrain also includes advanced visualization functions for surface-based data.</li>
+<li>GIFTI files can be read with the <a href="https://cran.r-project.org/package=gifti">gitfti package by John Muschelli</a>.</li>
 </ul>
 </div>
 </div>
