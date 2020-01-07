@@ -7,7 +7,9 @@
 #'
 #' @param empty_label_name string. The region name to assign to regions with empty name. Defaults to 'unknown'. Set to NULL if you want to keep the empty region name.
 #'
-#' @return named list, enties are: "vertices" vector of n vertex indices, starting with 0. "label_codes": vector of n integers, each entry is a color code, i.e., a value from the 5th column in the table structure included in the "colortable" entry (see below). "label_names": the n brain structure names for the vertices, already retrieved from the colortable using the code. "hex_colors_rgb": Vector of hex color for each vertex.
+#' @param metadata named list of arbitrary metadata to store in the instance.
+#'
+#' @return named list, entries are: "vertices" vector of n vertex indices, starting with 0. "label_codes": vector of n integers, each entry is a color code, i.e., a value from the 5th column in the table structure included in the "colortable" entry (see below). "label_names": the n brain structure names for the vertices, already retrieved from the colortable using the code. "hex_colors_rgb": Vector of hex color for each vertex.
 #'      The "colortable" is another named list with 3 entries: "num_entries": int, number of brain structures. "struct_names": vector of strings, the brain structure names. "table": numeric matrix with num_entries rows and 5 colums. The 5 columns are: 1 = color red channel, 2=color blue channel, 3=color green channel, 4=color alpha channel, 5=unique color code. "colortable_df": The same information as a dataframe. Contains the extra columns "hex_color_string_rgb" and "hex_color_string_rgba" that hold the color as an RGB(A) hex string, like "#rrggbbaa".
 #'
 #' @family atlas functions
@@ -17,9 +19,11 @@
 #'                                package = "freesurferformats",
 #'                                mustWork = TRUE);
 #'     annot = read.fs.annot(annot_file);
+#'     print(annot);
 #'
+#' @importFrom grDevices rgb
 #' @export
-read.fs.annot <- function(filepath, empty_label_name="unknown") {
+read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list()) {
 
     if(guess.filename.is.gzipped(filepath)) {
         fh = gzfile(filepath, "rb");
@@ -33,7 +37,7 @@ read.fs.annot <- function(filepath, empty_label_name="unknown") {
     verts = verts_and_labels[seq(1L, length(verts_and_labels), 2L)];
     labels = verts_and_labels[seq(2L, length(verts_and_labels), 2L)];
 
-    return_list = list("vertices" = verts, "label_codes" = labels);
+    return_list = list("vertices" = verts, "label_codes" = labels, "metadata"=metadata);
 
     has_colortable = readBin(fh, integer(), n = 1, endian = "big");
 
@@ -64,19 +68,19 @@ read.fs.annot <- function(filepath, empty_label_name="unknown") {
         code = colortable$table[,5];
         hex_color_string_rgb = grDevices::rgb(r/255., g/255., b/255.);
         hex_color_string_rgba = grDevices::rgb(r/255., g/255., b/255., a/255);
-        colortable_df = data.frame(struct_names, r, g, b, a, code, hex_color_string_rgb, hex_color_string_rgba);
+        colortable_df = data.frame(struct_names, r, g, b, a, code, hex_color_string_rgb, hex_color_string_rgba, stringsAsFactors = FALSE);
         colnames(colortable_df) = c("struct_name", "r", "g", "b", "a", "code", "hex_color_string_rgb", "hex_color_string_rgba");
         return_list$colortable_df = colortable_df;
 
         label_names = rep("", length(labels))
         hex_colors_rgb = rep("#333333", length(labels))
-        nempty = 1;  # There could be more than 1 empty region, and we cannot match all of them to the same name.
+        nempty = 1;  # There could be more than 1 empty region, and we cannot match all of them to the same name. Ususally there should not be any labels with empty name though.
         for (i in 1:length(colortable$struct_names)) {
           label_code = code[i];
           label_name = colortable$struct_names[i];
           hex_color_string_rgb = grDevices::rgb(colortable$table[i,1]/255., colortable$table[i,2]/255., colortable$table[i,3]/255.);
           if(nchar(empty_label_name) > 0 && nchar(label_name) == 0) {
-            cat(sprintf("Replacing empty label name with '%s'\n", empty_label_name));
+            warning(sprintf("Replacing empty label name with '%s'\n", empty_label_name));
             label_name = paste(empty_label_name, nempty, sep="");
             nempty = nempty + 1;
           }
@@ -88,9 +92,38 @@ read.fs.annot <- function(filepath, empty_label_name="unknown") {
 
     }
     close(fh);
+    class(return_list) = "fs.annot";
     return(return_list);
 }
 
+
+#' @title Print description of a brain atlas or annotation.
+#'
+#' @param x brain surface annotation or atlas with class `fs.annot`.
+#'
+#' @param ... further arguments passed to or from other methods
+#'
+#' @export
+print.fs.annot <- function(x, ...) {
+  if(is.null(x$colortable)) {
+    print(sprintf("Brain surface annotation without colortable for %d vertices containing %d unique region codes.", length(x$vertices), length(unique(x$label_codes))));
+  } else {
+    cat(sprintf("Brain surface annotation assigning %d vertices to %d brain regions.\n", length(x$vertices), nrow(x$colortable_df)));
+    for(region_idx in seq_len(nrow(x$colortable_df))) {
+      cat(sprintf(" - region #%d '%s': size %d vertices\n", region_idx, as.character(x$colortable_df$struct_name[[region_idx]]), sum(x$label_codes == x$colortable_df$code[[region_idx]])));
+    }
+  }
+}
+
+
+#' @title Check whether object is an fs.annot
+#'
+#' @param x any `R` object
+#'
+#' @return TRUE if its argument is a brain surface annotation (that is, has "fs.annot" amongst its classes) and FALSE otherwise.
+#'
+#' @export
+is.fs.annot <- function(x) inherits(x, "fs.annot")
 
 
 #' @title Read binary colortable in old format.

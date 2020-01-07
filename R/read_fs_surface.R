@@ -4,6 +4,8 @@
 #'
 #' @param filepath string. Full path to the input curv file. Note: gzipped files are supported and gz format is assumed if the filepath ends with ".gz".
 #'
+#' @param metadata named list of arbitrary metadata to store in the instance.
+#'
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software. "vertex_indices_fs": list of n integers, where n is the number of vertices. The FreeSurfer vertex indices for the vertices.
 #'
 #' @family mesh functions
@@ -16,7 +18,7 @@
 #'                             nrow(mesh$vertices), nrow(mesh$faces)));
 #'
 #' @export
-read.fs.surface <- function(filepath) {
+read.fs.surface <- function(filepath, metadata=list()) {
   TRIS_MAGIC_FILE_TYPE_NUMBER = 16777214;
   QUAD_MAGIC_FILE_TYPE_NUMBER = 16777215;
 
@@ -26,11 +28,11 @@ read.fs.surface <- function(filepath) {
     fh = file(filepath, "rb");
   }
 
-  ret_list = list();
+  ret_list = list("metadata"=metadata);
 
   magic_byte = fread3(fh);
   if (magic_byte == QUAD_MAGIC_FILE_TYPE_NUMBER) {
-    warning("Reading QUAD files in untested atm. Please use with care. This warning will be removed once the code has unit tests.")
+    warning("Reading QUAD files in untested atm. Please use with care. This warning will be removed once we have an example input file and the code has unit tests.")
     ret_list$mesh_face_type = "quads";
 
     num_vertices = fread3(fh);
@@ -109,6 +111,31 @@ read.fs.surface <- function(filepath) {
   ret_list$vertices = vertices;
   ret_list$vertex_indices_fs = 0L:(nrow(vertices)-1);
   ret_list$faces = faces;
+  class(ret_list) = "fs.surface";
   return(ret_list);
 }
+
+
+#' @title Print description of a brain surface.
+#'
+#' @param x brain surface with class `fs.surface`.
+#'
+#' @param ... further arguments passed to or from other methods
+#'
+#' @export
+print.fs.surface <- function(x, ...) {
+  cat(sprintf("Brain surface trimesh with %d vertices and %d faces.\n", nrow(x$vertices), nrow(x$faces)));
+  cat(sprintf("-Surface coordinates: minimal values are (%.2f, %.2f, %.2f), maximal values are (%.2f, %.2f, %.2f).\n", min(x$vertices[,1]), min(x$vertices[,2]), min(x$vertices[,3]), max(x$vertices[,1]), max(x$vertices[,2]), max(x$vertices[,3])));
+}
+
+
+#' @title Check whether object is an fs.surface
+#'
+#' @param x any `R` object
+#'
+#' @return TRUE if its argument is a brain surface (that is, has "fs.surface" amongst its classes) and FALSE otherwise.
+#'
+#' @export
+is.fs.surface <- function(x) inherits(x, "fs.surface")
+
 
