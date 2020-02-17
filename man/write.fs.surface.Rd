@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_fs_surface.R
 \name{write.fs.surface}
 \alias{write.fs.surface}
-\title{Write mesh to file in FreeSurfer surface format}
+\title{Write mesh to file in FreeSurfer binary surface format}
 \usage{
 write.fs.surface(filepath, vertex_coords, faces)
 }
@@ -18,7 +18,7 @@ string the format that was written. One of "tris" or "quads". Currently only tri
 }
 \description{
 Write vertex coordinates and vertex indices defining faces to a file in FreeSurfer binary surface format.
-   For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.white'.
+   For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.white'. This function writes the triangle version of the surface file format.
 }
 \examples{
 \donttest{
@@ -33,6 +33,10 @@ Write vertex coordinates and vertex indices defining faces to a file in FreeSurf
 
 }
 \seealso{
-Other mesh functions: \code{\link{read.fs.surface}}
+Other mesh functions: \code{\link{read.fs.surface.asc}},
+  \code{\link{read.fs.surface}},
+  \code{\link{read_nisurfacefile}},
+  \code{\link{read_nisurface}},
+  \code{\link{write.fs.surface.asc}}
 }
 \concept{mesh functions}

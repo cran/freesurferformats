@@ -1,3 +1,13 @@
+#' @title Determine whether a test is running on CRAN under macos
+#'
+#' @description We are currently getting failed unit tests on CRAN under macos, while the package works under MacOS on both <https://builder.r-hub.io/> and on our MacOS machines. This is because the package file cache does not work on CRAN, as the HOME is mounted read-only on the CRAN test systems. So we have to skip the tests that require optional data under MacOS on CRAN.
+#'
+#' @return logical, whether a test is running on CRAN under MacOS
+tests_running_on_cran_under_macos <- function() {
+  return(tolower(Sys.info()[["sysname"]]) == 'darwin' && !identical(Sys.getenv("NOT_CRAN"), "true"));
+}
+
+
 test_that("The dimensions of our demo 3D MGZ file are read correctly", {
   brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
   vd = read.fs.mgh(brain_image);
@@ -9,6 +19,9 @@ test_that("The dimensions of our demo 3D MGZ file are read correctly", {
 
 test_that("The data values in the demo 3D MGZ file are read as in the reference implementation", {
   # Tests that the data read is identical to the values returned by the matlab function $FREESURFER_HOME/matlab/MRIread.m
+  # You can also check with the `mri_info` command line tool, just be sure to shift the
+  # vertex indices (zero-based for mri_info, one-based in R). See comment below for an example.
+
   brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
   vd = read.fs.mgh(brain_image);
 
@@ -16,7 +29,7 @@ test_that("The data values in the demo 3D MGZ file are read as in the reference 
   expect_equal(length(dim(vd)), 4);  # It has 4 dimensions
   expect_equal(dim(vd), c(256, 256, 256, 1));
 
-  expect_equal(vd[100, 100, 100, 1], 77);
+  expect_equal(vd[100, 100, 100, 1], 77);      # try on command line: mri_info --voxel 99 99 99 inst/extdata/brain.mgz
   expect_equal(vd[110, 110, 110, 1], 71);
   expect_equal(vd[1, 1, 1, 1], 0);
 })
@@ -36,7 +49,7 @@ test_that("The demo 1D MGZ file is read correctly", {
 test_that("The header can be read", {
   brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
   ret = read.fs.mgh(brain_image, with_header=TRUE);
-  expect_equal(class(ret), "list");
+  expect_true(is.fs.volume(ret));
 
   header = ret$header;
   expect_equal(class(header), "list");
@@ -51,8 +64,8 @@ test_that("The header can be read", {
   expect_equal(header$internal$Pxyz_c, c(-0.5, 29.4, -48.9), tolerance=1e-2);
   expect_equal(header$voldim, c(256, 256, 256, 1));
   expect_equal(length(header$has_mr_params), 1);
-  expect_equal(length(header$mr_params), 4);
-  expect_equal(header$mr_params, c(2300.000000, 0.157080, 2.010000, 900.000000), tolerance=1e-2);
+  expect_equal(length(header$mr_params), 5);
+  expect_equal(header$mr_params, c(2300.000000, 0.157080, 2.010000, 900.000000, 256.000), tolerance=1e-2);
   expect_equal(length(header$internal$D), 9);  # 3x3
   expect_equal(length(header$internal$Pcrs_c), 3); # 3x1
   expect_equal(length(header$internal$Pxyz_0), 3); # 3x1
@@ -94,7 +107,7 @@ test_that("The gzip status is guessed as expected from a filename", {
 test_that("A real MGH can be read, rewritten, read again, and the data and header are preserved as expected.", {
   brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
   ret_orig = read.fs.mgh(brain_image, with_header=TRUE);
-  expect_equal(class(ret_orig), "list");
+  expect_true(is.fs.volume(ret_orig));
 
   new_copy = tempfile(fileext="mgz");
   write.fs.mgh(new_copy, ret_orig$data, vox2ras_matrix = ret_orig$header$vox2ras_matrix, mr_params=ret_orig$header$mr_params)
@@ -115,8 +128,8 @@ test_that("A real MGH can be read, rewritten, read again, and the data and heade
   expect_equal(header$internal$Pxyz_c, c(-0.5, 29.4, -48.9), tolerance=1e-2);
   expect_equal(header$voldim, c(256, 256, 256, 1));
   expect_equal(length(header$has_mr_params), 1);
-  expect_equal(length(header$mr_params), 4);
-  expect_equal(header$mr_params, c(2300.000000, 0.157080, 2.010000, 900.000000), tolerance=1e-2);
+  expect_equal(length(header$mr_params), 5);
+  expect_equal(header$mr_params, c(2300.000000, 0.157080, 2.010000, 900.000000, 256.000), tolerance=1e-2);
   expect_equal(header$vox2ras_matrix, matrix(c(-1,0,0,0,  0,0,-1,0,  0,1,0,0,  127.5,-98.6273,79.0953,1.000), nrow=4, byrow = FALSE), tolerance=1e-2);
 
 
