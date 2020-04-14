@@ -52,12 +52,56 @@ test_that("The tkregister ras2vox matrix can be computed from a conformed volume
 })
 
 
-test_that("The slice direction and orientation can be computed", {
+test_that("The slice direction and orientation can be computed from full fs.volume", {
   brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
   mgh = read.fs.mgh(brain_image, with_header=TRUE);
   expect_true(mghheader.is.conformed(mgh));
   expect_equal(mghheader.primary.slice.direction(mgh), 'coronal');
   expect_equal(mghheader.crs.orientation(mgh), 'LIA');
 })
+
+
+test_that("The slice direction and orientation can be computed from the volume header", {
+  brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
+  mgh = read.fs.mgh(brain_image, with_header=TRUE);
+  header = mgh$header;
+  expect_true(mghheader.is.conformed(header));
+  expect_equal(mghheader.primary.slice.direction(header), 'coronal');
+  expect_equal(mghheader.crs.orientation(header), 'LIA');
+})
+
+
+test_that("The mgh header fields can be initialized from a vox2ras matrix", {
+  brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
+  mgh = read.fs.mgh(brain_image, with_header=TRUE);
+  header = mgh$header;
+
+  vox2ras = mghheader.vox2ras(header);
+  new_header = mghheader.update.from.vox2ras(header, vox2ras);   # Update with the matrix it already has, i.e., set basic fields from matrix.
+  new_vox2ras = mghheader.vox2ras(new_header);                   # Recompute matrix from set basic fields.
+
+  expect_equal(vox2ras, new_vox2ras);                            # This should lead to the same matrix.
+})
+
+
+test_that("The RAS coordinate of the center voxel (CRAS) can be computed from the RAS coordinate for the first voxel (P0 RAS).", {
+  brain_image = system.file("extdata", "brain.mgz", package = "freesurferformats", mustWork = TRUE);
+  mgh = read.fs.mgh(brain_image, with_header=TRUE);
+  header = mgh$header;
+
+  vox2ras = mghheader.vox2ras(header);
+  first_voxel_CRS = c(1L, 1L, 1L);
+  first_voxel_RAS = vox2ras[,4][0:3];  # the P0 RAS
+  known_first_voxel_RAS = c(127.5, -98.6273, 79.0953);   # known from: `mri_info --p0  path/to/brain.mgz` (in system shell)
+  expect_equal(first_voxel_RAS, known_first_voxel_RAS, tolerance=1e-2);
+
+  center_RAS = mghheader.centervoxelRAS.from.firstvoxelRAS(header, first_voxel_RAS);  # center RAS is also known as 'CRAS'.
+
+  known_center_RAS = c(-0.499954, 29.3727, -48.9047);     # known from: `mri_info --cras  path/to/brain.mgz` (in system shell)
+
+  expect_equal(center_RAS, known_center_RAS, tolerance=1e-2);
+})
+
+
 
 

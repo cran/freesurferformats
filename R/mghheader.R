@@ -366,3 +366,147 @@ mghheader.crs.orientation <- function(header) {
   return(get.slice.orientation(mdc)$orientation_string);
 }
 
+
+#' @title Constructor to init MGH header instance.
+#'
+#' @param dims integer vector of length 4, the header dimensions. Example: \code{c(256L, 256L, 256L, 1L)}.
+#'
+#' @param mri_dtype_code integer, a valid MRI datatype. See \code{\link[freesurferformats]{translate.mri.dtype}}.
+#'
+#' @return a named list representing the header
+#'
+#' @keywords internal
+mghheader <- function(dims, mri_dtype_code) {
+  if(length(dims) != 4L) {
+    stop("Parameter dims must have length 4.");
+  }
+
+  if(! is.integer(mri_dtype_code)) {
+    stop("Parameter 'mri_dtype_code' must be an integer.");
+  }
+
+  dtype_name = translate.mri.dtype(mri_dtype_code); # The function is (ab)used to check the passed value, the return value is not used.
+
+  header = list();
+  header$internal = list();
+  header$dtype = mri_dtype_code;
+  header$nbytespervox = mri_dtype_numbytes(mri_dtype_code);
+  header$ras_good_flag = 0L;
+  header$internal$width = dims[1];
+  header$internal$height = dims[2];
+  header$internal$depth = dims[3];
+  header$internal$nframes = dims[4];
+
+  header$voldim = c(dims[1], dims[2], dims[3], dims[4]);
+  header$voldim_orig = header$voldim;
+
+  cat(sprintf("Created MGH header with dimensions %s.\n", paste(header$voldim, collapse="x")))
+
+  header$has_mr_params = 0L;
+  header$mr = list("tr"=0.0, "te"=0.0, "ti"=0.0, "flip_angle_degrees"=0.0, "fov"=0.0);
+  return(header);
+}
+
+
+#' @title Update mghheader fields from vox2ras matrix.
+#'
+#' @param header Header of the mgh datastructure, as returned by \code{\link[freesurferformats]{read.fs.mgh}}.
+#'
+#' @param vox2ras 4x4 numerical matrix, the vox2ras transformation matrix.
+#'
+#' @return a named list representing the header
+#'
+#' @export
+mghheader.update.from.vox2ras <- function(header, vox2ras) {
+
+  # see mri.cpp MRIsetVox2RASFromMatrix
+
+  updated_header = header;
+
+  if(! is.matrix(vox2ras)) {
+    stop("Parameter 'vox2ras' must be a numerical 4x4 matrix.");
+  }
+
+  rx = vox2ras[1, 1];
+  ry = vox2ras[1, 2];
+  rz = vox2ras[1, 3];
+  ax = vox2ras[2, 1];
+  ay = vox2ras[2, 2];
+  az = vox2ras[2, 3];
+  sx = vox2ras[3, 1];
+  sy = vox2ras[3, 2];
+  sz = vox2ras[3, 3];
+
+  # The next 3 values encode the RAS coordinate of the first voxel, i.e., the voxel at CRS=c(1,1,1) in R-indexing or (0,0,0 in C-indexing).
+  P0r = vox2ras[1, 4];
+  P0a = vox2ras[2, 4];
+  P0s = vox2ras[3, 4];
+
+  xsize = sqrt(rx * rx + ax * ax + sx * sx);
+  ysize = sqrt(ry * ry + ay * ay + sy * sy);
+  zsize = sqrt(rz * rz + az * az + sz * sz);
+
+  if(any(abs(c(xsize, ysize, zsize) - c(updated_header$internal$xsize, updated_header$internal$ysize, updated_header$internal$zsize)) > 0.001)) {
+    message(sprintf("mghheader.update.from.vox2ras: Voxel sizes inconsistent, matrix may contain shear, which is not supported."));
+  }
+
+  updated_header$internal$x_r = rx / xsize;
+  updated_header$internal$x_a = ax / xsize;
+  updated_header$internal$x_s = sx / xsize;
+
+  updated_header$internal$y_r = ry / ysize;
+  updated_header$internal$y_a = ay / ysize;
+  updated_header$internal$y_s = sy / ysize;
+
+  updated_header$internal$z_r = rz / zsize;
+  updated_header$internal$z_a = az / zsize;
+  updated_header$internal$z_s = sz / zsize;
+
+  updated_header$internal$Mdc = matrix(c(updated_header$internal$x_r, updated_header$internal$x_a, updated_header$internal$x_s, updated_header$internal$y_r, updated_header$internal$y_a, updated_header$internal$y_s, updated_header$internal$z_r, updated_header$internal$z_a, updated_header$internal$z_s), nrow = 3, byrow = FALSE);
+
+  # Compute and set the RAS coordinates of the center voxel, given the RAS coordinates of the first voxel.
+  updated_header$ras_good_flag = 1L;
+  center_voxel_ras_coords = mghheader.centervoxelRAS.from.firstvoxelRAS(updated_header, c(P0r, P0a, P0s));
+  updated_header$internal$c_r = center_voxel_ras_coords[1];
+  updated_header$internal$c_a = center_voxel_ras_coords[2];
+  updated_header$internal$c_s = center_voxel_ras_coords[3];
+
+  return(updated_header);
+}
+
+
+#' @title Compute RAS coords of center voxel.
+#'
+#' @param header Header of the mgh datastructure, as returned by \code{\link[freesurferformats]{read.fs.mgh}}. The `c_r`, `c_a` and `c_s` values in do not matter of course, they are what is computed by this function.
+#'
+#' @param first_voxel_RAS numerical vector of length 3, the RAS coordinate of the first voxel in the volume. The first voxel is the voxel with `CRS=1,1,1` in R, or `CRS=0,0,0` in C/FreeSurfer. This value is also known as *P0 RAS*.
+#'
+#' @return numerical vector of length 3, the RAS coordinate of the center voxel. Also known as *CRAS* or *center RAS*.
+#'
+#' @export
+mghheader.centervoxelRAS.from.firstvoxelRAS <- function(header, first_voxel_RAS) {
+
+  if(length(first_voxel_RAS) != 3L) {
+    stop("Parameter 'first_voxel_RAS' must be a numerical vector of length 3.");
+  }
+
+  # Set the missing header values to arbitrary values for now, if needed.
+  if(is.null(header$internal$c_r)) {
+    header$internal$c_r = 0.0;
+  }
+  if(is.null(header$internal$c_a)) {
+    header$internal$c_a = 0.0;
+  }
+  if(is.null(header$internal$c_s)) {
+    header$internal$c_s = 0.0;
+  }
+
+  incomplete_vox2ras = mghheader.vox2ras(header);
+  incomplete_vox2ras[1, 4] = first_voxel_RAS[1];
+  incomplete_vox2ras[2, 4] = first_voxel_RAS[2];
+  incomplete_vox2ras[3, 4] = first_voxel_RAS[3];
+
+  center_voxel_CRS = c(header$internal$width / 2.0, header$internal$height / 2.0, header$internal$depth / 2.0, 1.0);
+  center_voxel_RAS = incomplete_vox2ras %*% center_voxel_CRS;
+  return(center_voxel_RAS[1:3]);
+}

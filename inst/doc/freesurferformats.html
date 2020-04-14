@@ -19,67 +19,41 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
-}
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  }
-@media screen {
-a.sourceLine::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 
 </style>
 <script>
@@ -106,189 +80,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
-}
-#header {
-text-align: center;
-}
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
-}
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
-}
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
-}
-#TOC ul ul {
-margin-left: -2em;
-}
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
-
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
-</style>
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
 
 
@@ -316,83 +108,83 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="reading-mgh-and-mgz-format-files" class="section level2">
 <h2>Reading MGH and MGZ format files</h2>
 <p>Here is a first example for reading MGH data.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;brain.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">    brain =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file)</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Read voxel data with dimensions %s. Values: min=%d, mean=%f, max=%d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">paste</span>(<span class="kw">dim</span>(brain), <span class="dt">collapse =</span> <span class="st">'x'</span>), <span class="kw">min</span>(brain), <span class="kw">mean</span>(brain), <span class="kw">max</span>(brain)));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>)
+    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;brain.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)
+    brain =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file)
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Read voxel data with dimensions %s. Values: min=%d, mean=%f, max=%d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">paste</span>(<span class="kw">dim</span>(brain), <span class="dt">collapse =</span> <span class="st">'x'</span>), <span class="kw">min</span>(brain), <span class="kw">mean</span>(brain), <span class="kw">max</span>(brain)));</code></pre></div>
 <pre><code>## Read voxel data with dimensions 256x256x256x1. Values: min=0, mean=7.214277, max=156.</code></pre>
 <p>Now, <code>brain</code> is an <em>n</em>-dimensional matrix, where <em>n</em> depends on the data in the MGZ file. A conformed FreeSurfer volume like <code>brain.mgz</code> typically has 4 dimensions and 256 x 256 x 256 x 1 = 16777216 voxels. The final dimension, which is 1 here, means it has only a single time point or <em>frame</em>. In this case, the file was compressed and in MGZ format, but the function does not care, it works for both MGH and MGZ.</p>
 <p>If you need the header data, read on.</p>
 <div id="accessing-metadata-from-the-mgh-header" class="section level3">
 <h3>Accessing metadata from the MGH header</h3>
 <p>To access not only the volume data, but also the header, call <code>read.fs.mgh</code> like this:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">    brain_with_hdr =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file, <span class="dt">with_header =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">    brain =<span class="st"> </span>brain_with_hdr<span class="op">$</span>data;   <span class="co"># as seen before, this is what we got in the last example (the data).</span></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">    header =<span class="st"> </span>brain_with_hdr<span class="op">$</span>header;   <span class="co"># the header</span></a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    brain_with_hdr =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file, <span class="dt">with_header =</span> <span class="ot">TRUE</span>);
+    brain =<span class="st"> </span>brain_with_hdr<span class="op">$</span>data;   <span class="co"># as seen before, this is what we got in the last example (the data).</span>
+    header =<span class="st"> </span>brain_with_hdr<span class="op">$</span>header;   <span class="co"># the header</span></code></pre></div>
 <p>Now you have acces to the following header data:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">    header<span class="op">$</span>dtype           <span class="co"># int, one of: 0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">    header<span class="op">$</span>ras_good_flag   <span class="co"># int, 0 or 1. Whether the file contains a valid vox2ras matrix and ras_xform (see header$vox2ras_matrix below)</span></a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">    header<span class="op">$</span>has_mr_params   <span class="co"># int, 0 or 1. Whether the file contains mr_params (see header$mr_params below)</span></a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">    header<span class="op">$</span>voldim          <span class="co"># integer vector or length 4. The volume (=data) dimensions. E.g., c(256, 256, 256, 1) for 3D data.</span></a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    header<span class="op">$</span>dtype           <span class="co"># int, one of: 0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT</span>
+    header<span class="op">$</span>ras_good_flag   <span class="co"># int, 0 or 1. Whether the file contains a valid vox2ras matrix and ras_xform (see header$vox2ras_matrix below)</span>
+    header<span class="op">$</span>has_mr_params   <span class="co"># int, 0 or 1. Whether the file contains mr_params (see header$mr_params below)</span>
+    header<span class="op">$</span>voldim          <span class="co"># integer vector or length 4. The volume (=data) dimensions. E.g., c(256, 256, 256, 1) for 3D data.</span></code></pre></div>
 <p>If your MGH/MGZ file contains valid information on the vox2ras matrix and/or acquisition parameters (<code>mr_params</code>), you can access them like this for the mr params:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">    <span class="cf">if</span>(header<span class="op">$</span>has_mr_params) {</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">        mr_params =<span class="st"> </span>header<span class="op">$</span>mr_params;  </a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;MR acquisition parameters: TR [ms]=%f, filp angle [radians]=%f, TE [ms]=%f, TI [ms]=%f</span><span class="ch">\n</span><span class="st">&quot;</span>, mr_params[<span class="dv">1</span>], mr_params[<span class="dv">2</span>], mr_params[<span class="dv">3</span>], mr_params[<span class="dv">4</span>]));</a>
-<a class="sourceLine" id="cb5-4" data-line-number="4">    }</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="cf">if</span>(header<span class="op">$</span>has_mr_params) {
+        mr_params =<span class="st"> </span>header<span class="op">$</span>mr_params;  
+        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;MR acquisition parameters: TR [ms]=%f, filp angle [radians]=%f, TE [ms]=%f, TI [ms]=%f</span><span class="ch">\n</span><span class="st">&quot;</span>, mr_params[<span class="dv">1</span>], mr_params[<span class="dv">2</span>], mr_params[<span class="dv">3</span>], mr_params[<span class="dv">4</span>]));
+    }</code></pre></div>
 <pre><code>## MR acquisition parameters: TR [ms]=2300.000000, filp angle [radians]=0.157080, TE [ms]=2.010000, TI [ms]=900.000000</code></pre>
 <p>And like this for the <code>vox2ras_matrix</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">    <span class="cf">if</span>(header<span class="op">$</span>ras_good_flag) {</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2">        <span class="kw">print</span>(header<span class="op">$</span>vox2ras_matrix);</a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">    }</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="cf">if</span>(header<span class="op">$</span>ras_good_flag) {
+        <span class="kw">print</span>(header<span class="op">$</span>vox2ras_matrix);
+    }</code></pre></div>
 <pre><code>##      [,1] [,2] [,3]      [,4]
 ## [1,]   -1    0    0 127.50005
 ## [2,]    0    0    1 -98.62726
 ## [3,]    0   -1    0  79.09527
 ## [4,]    0    0    0   1.00000</code></pre>
 <p>And finally the <code>ras_xform</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">    <span class="cf">if</span>(header<span class="op">$</span>ras_good_flag) {</a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">        <span class="kw">print</span>(header<span class="op">$</span>ras_xform);</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">    }</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="cf">if</span>(header<span class="op">$</span>ras_good_flag) {
+        <span class="kw">print</span>(header<span class="op">$</span>ras_xform);
+    }</code></pre></div>
 <pre><code>## NULL</code></pre>
 </div>
 <div id="a-second-mgh-example" class="section level3">
 <h3>A second MGH example</h3>
 <p>The MGH/MGZ format is also used to store morphometry data mapped to standard space (fsaverage). In the following example, we read cortical thickness data in standard space, smoothed with a FWHM 25 kernel:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;mystudy&quot;</span>, <span class="st">&quot;subject1&quot;</span>, <span class="st">&quot;surf&quot;</span>, <span class="st">&quot;lh.thickness.fwhm25.fsaverage.mgh&quot;</span>)</a>
-<a class="sourceLine" id="cb11-2" data-line-number="2">    cortical_thickness_standard =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;mystudy&quot;</span>, <span class="st">&quot;subject1&quot;</span>, <span class="st">&quot;surf&quot;</span>, <span class="st">&quot;lh.thickness.fwhm25.fsaverage.mgh&quot;</span>)
+    cortical_thickness_standard =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file)</code></pre></div>
 <p>Now, <code>cortical_thickness_standard</code> is a vector of <em>n</em> float values, where <em>n</em> is the number of vertices of the <em>fsaverage</em> subject’s left hemisphere surface (i.e., 163842 in FreeSurfer 6).</p>
 </div>
 <div id="hint-further-image-processing-and-visualization-for-volumes" class="section level3">
 <h3>Hint: Further image processing and visualization for volumes</h3>
 <p>If all you need is to perform statistical analysis of the data in the MGH file, you are ready to do that after loading. If you need access to more image operations, I would recommend to convert the data to a NIFTI object. E.g., if you have <a href="https://CRAN.R-project.org/package=oro.nifti">oro.nifti</a> installed, you could visualize the <code>brain</code> data we loaded earlier like this:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">    oro.nifti<span class="op">::</span><span class="kw">orthographic</span>(oro.nifti<span class="op">::</span><span class="kw">nifti</span>(brain))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    oro.nifti<span class="op">::</span><span class="kw">orthographic</span>(oro.nifti<span class="op">::</span><span class="kw">nifti</span>(brain))</code></pre></div>
 <p>If you need advanced visualization, including the option to render morphometry data or annotation on 3D brain surface meshes, you can have a look at the <a href="https://github.com/dfsp-spirit/fsbrain">fsbrain package</a>.</p>
 </div>
 </div>
 <div id="reading-curv-format-files" class="section level2">
 <h2>Reading ‘curv’ format files</h2>
 <p>Let’s read an example morphometry data file that comes with this package. It contains vertex-wise measures of cortical thickness for the left hemisphere of a single subject in native space.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>)</a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">    curvfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">    ct =<span class="st"> </span><span class="kw">read.fs.curv</span>(curvfile)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>)
+    curvfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)
+    ct =<span class="st"> </span><span class="kw">read.fs.curv</span>(curvfile)</code></pre></div>
 <p>Now, <code>ct</code> is a vector of <em>n</em> float values, where <em>n</em> is the number of vertices of the surface mesh the data belongs to (usually <code>surf/lh.white</code>). The number of vertices differs between subjects, as this is native space data.</p>
 <p>We can now have a closer look at the data and maybe plot a histogram of cortical thickness for this subject:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Read data for %d vertices. Values: min=%f, mean=%f, max=%f.</span><span class="ch">\n</span><span class="st">&quot;</span>,  <span class="kw">length</span>(ct), <span class="kw">min</span>(ct), <span class="kw">mean</span>(ct), <span class="kw">max</span>(ct)))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Read data for %d vertices. Values: min=%f, mean=%f, max=%f.</span><span class="ch">\n</span><span class="st">&quot;</span>,  <span class="kw">length</span>(ct), <span class="kw">min</span>(ct), <span class="kw">mean</span>(ct), <span class="kw">max</span>(ct)))</code></pre></div>
 <pre><code>## Read data for 149244 vertices. Values: min=0.000000, mean=2.437466, max=5.000000.</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">    <span class="kw">hist</span>(ct, <span class="dt">main=</span><span class="st">&quot;lh cortical thickness&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;Cortical thickness [mm]&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Vertex count&quot;</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    <span class="kw">hist</span>(ct, <span class="dt">main=</span><span class="st">&quot;lh cortical thickness&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;Cortical thickness [mm]&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Vertex count&quot;</span>)</code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="reading-morphometry-data-no-matter-the-format" class="section level2">
 <h2>Reading morphometry data, no matter the format</h2>
 <p>The package provides a wrapper function to read morphometry data, no matter the format. It always returns data as a vector and automatically determines the format from the file name. Here we use the function to read the file from the last example:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">    morphfile1 =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">    thickness_native =<span class="st"> </span><span class="kw">read.fs.morph</span>(morphfile1)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    morphfile1 =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)
+    thickness_native =<span class="st"> </span><span class="kw">read.fs.morph</span>(morphfile1)</code></pre></div>
 <p>And here is an example for an MGZ file:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">    morphfile2 =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.curv.fwhm10.fsaverage.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">    curv_standard =<span class="st"> </span><span class="kw">read.fs.morph</span>(morphfile2)</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">    curv_standard[curv_standard <span class="op">&lt;</span><span class="st"> </span><span class="dv">-1</span>] =<span class="st"> </span><span class="dv">0</span>; <span class="co"># remove extreme outliers</span></a>
-<a class="sourceLine" id="cb18-4" data-line-number="4">    curv_standard[curv_standard <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>] =<span class="st"> </span><span class="dv">0</span>;</a>
-<a class="sourceLine" id="cb18-5" data-line-number="5">    <span class="kw">hist</span>(curv_standard, <span class="dt">main=</span><span class="st">&quot;lh std curvature&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;Mean Curvature [mm^-1], fwhm10&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Vertex count&quot;</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    morphfile2 =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.curv.fwhm10.fsaverage.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>)
+    curv_standard =<span class="st"> </span><span class="kw">read.fs.morph</span>(morphfile2)
+    curv_standard[curv_standard <span class="op">&lt;</span><span class="st"> </span><span class="dv">-1</span>] =<span class="st"> </span><span class="dv">0</span>; <span class="co"># remove extreme outliers</span>
+    curv_standard[curv_standard <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>] =<span class="st"> </span><span class="dv">0</span>;
+    <span class="kw">hist</span>(curv_standard, <span class="dt">main=</span><span class="st">&quot;lh std curvature&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;Mean Curvature [mm^-1], fwhm10&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Vertex count&quot;</span>)</code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="reading-morphometry-data-for-a-subset-of-vertices-from-weight-paint-or-w-files" class="section level2">
@@ -403,26 +195,26 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Reading annotation files</h2>
 <p>An annotation file contains a cortical parcellation for a subject, based on a brain atlas. It contains a label for each vertex of a surface, and that label assigns this vertex to one of a set of atlas regions. The file format also contains a colortable, which assigns a color code to each atlas region. An example file would be <code>labels/lh.aparc.annot</code> for the <code>aparc</code> (Desikan) atlas.</p>
 <p>Let’s read an example annotation file that comes with this package:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">    annotfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.aparc.annot.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb19-2" data-line-number="2">    annot =<span class="st"> </span><span class="kw">read.fs.annot</span>(annotfile);</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    annotfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.aparc.annot.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
+    annot =<span class="st"> </span><span class="kw">read.fs.annot</span>(annotfile);</code></pre></div>
 <p><strong>Note:</strong> The example file that comes with this package was gzipped to save space. While this is not typical for annot files, the <em>read.fs.annot</em> function handles it automatically if the filename ends with <em>.gz</em>.</p>
 </div>
 <div id="working-with-annotation-data" class="section level2">
 <h2>Working with annotation data</h2>
 <p>As mentioned earlier, such a file contains various pieces of information. Let us investigate the labels and the atlas region names for some vertices first:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">    num_vertices_total =<span class="st"> </span><span class="kw">length</span>(annot<span class="op">$</span>vertices);</a>
-<a class="sourceLine" id="cb20-2" data-line-number="2">    <span class="cf">for</span> (vert_idx <span class="cf">in</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5000</span>, <span class="dv">123456</span>)) {</a>
-<a class="sourceLine" id="cb20-3" data-line-number="3">        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex #%d with zero-based index %d has label code '%d' which stands for atlas region '%s'</span><span class="ch">\n</span><span class="st">&quot;</span>, vert_idx, annot<span class="op">$</span>vertices[vert_idx], annot<span class="op">$</span>label_codes[vert_idx], annot<span class="op">$</span>label_names[vert_idx]));</a>
-<a class="sourceLine" id="cb20-4" data-line-number="4">    }</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    num_vertices_total =<span class="st"> </span><span class="kw">length</span>(annot<span class="op">$</span>vertices);
+    <span class="cf">for</span> (vert_idx <span class="cf">in</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5000</span>, <span class="dv">123456</span>)) {
+        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex #%d with zero-based index %d has label code '%d' which stands for atlas region '%s'</span><span class="ch">\n</span><span class="st">&quot;</span>, vert_idx, annot<span class="op">$</span>vertices[vert_idx], annot<span class="op">$</span>label_codes[vert_idx], annot<span class="op">$</span>label_names[vert_idx]));
+    }</code></pre></div>
 <pre><code>## Vertex #1 with zero-based index 0 has label code '9182740' which stands for atlas region 'lateraloccipital'
 ## Vertex #5000 with zero-based index 4999 has label code '3957880' which stands for atlas region 'pericalcarine'
 ## Vertex #123456 with zero-based index 123455 has label code '14474380' which stands for atlas region 'superiortemporal'</code></pre>
 <p>Now, we will focus on the colortable. We will list the available regions and their color codes.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">    ctable =<span class="st"> </span>annot<span class="op">$</span>colortable<span class="op">$</span>table;</a>
-<a class="sourceLine" id="cb22-2" data-line-number="2">    regions =<span class="st"> </span>annot<span class="op">$</span>colortable<span class="op">$</span>struct_names;</a>
-<a class="sourceLine" id="cb22-3" data-line-number="3">    <span class="cf">for</span> (region_idx <span class="cf">in</span> <span class="kw">seq_len</span>(annot<span class="op">$</span>colortable<span class="op">$</span>num_entries)) {</a>
-<a class="sourceLine" id="cb22-4" data-line-number="4">        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Region #%d called '%s' has RGBA color (%d %d %d %d) and code '%d'.</span><span class="ch">\n</span><span class="st">&quot;</span>, region_idx, regions[region_idx], ctable[region_idx,<span class="dv">1</span>], ctable[region_idx,<span class="dv">2</span>], ctable[region_idx,<span class="dv">3</span>], ctable[region_idx,<span class="dv">4</span>], ctable[region_idx,<span class="dv">5</span>]));</a>
-<a class="sourceLine" id="cb22-5" data-line-number="5">    }</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    ctable =<span class="st"> </span>annot<span class="op">$</span>colortable<span class="op">$</span>table;
+    regions =<span class="st"> </span>annot<span class="op">$</span>colortable<span class="op">$</span>struct_names;
+    <span class="cf">for</span> (region_idx <span class="cf">in</span> <span class="kw">seq_len</span>(annot<span class="op">$</span>colortable<span class="op">$</span>num_entries)) {
+        <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Region #%d called '%s' has RGBA color (%d %d %d %d) and code '%d'.</span><span class="ch">\n</span><span class="st">&quot;</span>, region_idx, regions[region_idx], ctable[region_idx,<span class="dv">1</span>], ctable[region_idx,<span class="dv">2</span>], ctable[region_idx,<span class="dv">3</span>], ctable[region_idx,<span class="dv">4</span>], ctable[region_idx,<span class="dv">5</span>]));
+    }</code></pre></div>
 <pre><code>## Region #1 called 'unknown' has RGBA color (25 5 25 0) and code '1639705'.
 ## Region #2 called 'bankssts' has RGBA color (25 100 40 0) and code '2647065'.
 ## Region #3 called 'caudalanteriorcingulate' has RGBA color (125 100 160 0) and code '10511485'.
@@ -460,14 +252,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## Region #35 called 'transversetemporal' has RGBA color (150 150 200 0) and code '13145750'.
 ## Region #36 called 'insula' has RGBA color (255 192 32 0) and code '2146559'.</code></pre>
 <p>Keep in mind the indices when comparing results to those from other software: in GNU R, indices start with 1 but the FreeSurfer standard indices are zero-based:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">    r_index =<span class="st"> </span><span class="dv">50</span>;                       <span class="co"># one-based index as used by R and Matlab</span></a>
-<a class="sourceLine" id="cb24-2" data-line-number="2">    fs_index =<span class="st"> </span>annot<span class="op">$</span>vertices[r_index];  <span class="co"># zero-based index as used in C, Java, Python and many modern languages</span></a>
-<a class="sourceLine" id="cb24-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex at R index %d has FreeSurfer index %d and lies in region '%s'.</span><span class="ch">\n</span><span class="st">&quot;</span>, r_index, fs_index, annot<span class="op">$</span>label_names[r_index]));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    r_index =<span class="st"> </span><span class="dv">50</span>;                       <span class="co"># one-based index as used by R and Matlab</span>
+    fs_index =<span class="st"> </span>annot<span class="op">$</span>vertices[r_index];  <span class="co"># zero-based index as used in C, Java, Python and many modern languages</span>
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex at R index %d has FreeSurfer index %d and lies in region '%s'.</span><span class="ch">\n</span><span class="st">&quot;</span>, r_index, fs_index, annot<span class="op">$</span>label_names[r_index]));</code></pre></div>
 <pre><code>## Vertex at R index 50 has FreeSurfer index 49 and lies in region 'lateraloccipital'.</code></pre>
 <p>Let us retrieve some information on a specific region. We will reuse the <code>thickness_native</code> data loaded above:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">    region =<span class="st"> &quot;bankssts&quot;</span></a>
-<a class="sourceLine" id="cb26-2" data-line-number="2">    thickness_in_region =<span class="st"> </span>thickness_native[annot<span class="op">$</span>label_names <span class="op">==</span><span class="st"> </span>region]</a>
-<a class="sourceLine" id="cb26-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Region '%s' has %d vertices and a mean cortical thickness of %f mm.</span><span class="ch">\n</span><span class="st">&quot;</span>, region, <span class="kw">length</span>(thickness_in_region), <span class="kw">mean</span>(thickness_in_region)));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    region =<span class="st"> &quot;bankssts&quot;</span>
+    thickness_in_region =<span class="st"> </span>thickness_native[annot<span class="op">$</span>label_names <span class="op">==</span><span class="st"> </span>region]
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Region '%s' has %d vertices and a mean cortical thickness of %f mm.</span><span class="ch">\n</span><span class="st">&quot;</span>, region, <span class="kw">length</span>(thickness_in_region), <span class="kw">mean</span>(thickness_in_region)));</code></pre></div>
 <pre><code>## Region 'bankssts' has 1722 vertices and a mean cortical thickness of 2.485596 mm.</code></pre>
 <p>That’s all the information you can get from an annotation file.</p>
 </div>
@@ -475,19 +267,19 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Reading surface files</h2>
 <p>A surface file contains a brain surface mesh, i.e., a list of vertices and a list of faces. A vertex is defined by its three x,y,z coordinates, which are doubles. A face is defined by three vertex indices. Example files are <code>surf/lh.white</code> or <code>surf/rh.pial</code>.</p>
 <p>Let’s read an tiny example surface file that comes with this package:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">    surface_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.tinysurface&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb28-2" data-line-number="2">    surf =<span class="st"> </span><span class="kw">read.fs.surface</span>(surface_file);</a>
-<a class="sourceLine" id="cb28-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Loaded surface consisting of %d vertices and %d faces.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">nrow</span>(surf<span class="op">$</span>vertices), <span class="kw">nrow</span>(surf<span class="op">$</span>faces)));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    surface_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.tinysurface&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
+    surf =<span class="st"> </span><span class="kw">read.fs.surface</span>(surface_file);
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Loaded surface consisting of %d vertices and %d faces.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">nrow</span>(surf<span class="op">$</span>vertices), <span class="kw">nrow</span>(surf<span class="op">$</span>faces)));</code></pre></div>
 <pre><code>## Loaded surface consisting of 5 vertices and 3 faces.</code></pre>
 <p>Now we can print the coordinates of vertex 5:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">    vertex_index =<span class="st"> </span><span class="dv">5</span>;</a>
-<a class="sourceLine" id="cb30-2" data-line-number="2">    v5 =<span class="st"> </span>surf<span class="op">$</span>vertices[vertex_index,];</a>
-<a class="sourceLine" id="cb30-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex %d has coordinates (%f, %f, %f).</span><span class="ch">\n</span><span class="st">&quot;</span>, vertex_index, v5[<span class="dv">1</span>], v5[<span class="dv">2</span>], v5[<span class="dv">3</span>]));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    vertex_index =<span class="st"> </span><span class="dv">5</span>;
+    v5 =<span class="st"> </span>surf<span class="op">$</span>vertices[vertex_index,];
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Vertex %d has coordinates (%f, %f, %f).</span><span class="ch">\n</span><span class="st">&quot;</span>, vertex_index, v5[<span class="dv">1</span>], v5[<span class="dv">2</span>], v5[<span class="dv">3</span>]));</code></pre></div>
 <pre><code>## Vertex 5 has coordinates (0.300000, 0.300000, 0.300000).</code></pre>
 <p>And also the 3 vertices that make up face 2:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">    face_index =<span class="st"> </span><span class="dv">2</span>;</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">    f2 =<span class="st"> </span>surf<span class="op">$</span>faces[face_index,];</a>
-<a class="sourceLine" id="cb32-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Face %d consistes of the vertices %d, %d, and %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, face_index, f2[<span class="dv">1</span>], f2[<span class="dv">2</span>], f2[<span class="dv">3</span>]));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    face_index =<span class="st"> </span><span class="dv">2</span>;
+    f2 =<span class="st"> </span>surf<span class="op">$</span>faces[face_index,];
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Face %d consistes of the vertices %d, %d, and %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, face_index, f2[<span class="dv">1</span>], f2[<span class="dv">2</span>], f2[<span class="dv">3</span>]));</code></pre></div>
 <pre><code>## Face 2 consistes of the vertices 2, 4, and 5.</code></pre>
 <p>Note that the vertex indices start with 1 in GNU R. The vertex indices in the file are 0-based, but this is handled transparently by the ‘read.fs.surface’ and ‘write.fs.surface’ functions.</p>
 </div>
@@ -495,17 +287,17 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Reading labels</h2>
 <p>A label defines a list of vertices (of an associated surface or morphometry file) which are part of it. All others are not. You can think of it as binary mask. An atlas or annotation can be thought of as a list of labels, each of which defines a single brain region (the annotation also contains a colormap for the regions). Labels are useful to extract or mask out certain brain regions. E.g., you may want to exclude the medial wall from your analysis, of you may only be interested in a certain brain region.</p>
 <p>The following example reads a label file:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1">    labelfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.entorhinal_exvivo.label&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb34-2" data-line-number="2">    label =<span class="st"> </span><span class="kw">read.fs.label</span>(labelfile);</a>
-<a class="sourceLine" id="cb34-3" data-line-number="3">    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;The label consists of %d vertices, the first one is vertex %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">length</span>(label), label[<span class="dv">1</span>]));</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    labelfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.entorhinal_exvivo.label&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
+    label =<span class="st"> </span><span class="kw">read.fs.label</span>(labelfile);
+    <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;The label consists of %d vertices, the first one is vertex %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, <span class="kw">length</span>(label), label[<span class="dv">1</span>]));</code></pre></div>
 <pre><code>## The label consists of 1085 vertices, the first one is vertex 88792.</code></pre>
 </div>
 <div id="reading-color-lookup-tables-lut-files" class="section level2">
 <h2>Reading color lookup tables (LUT files)</h2>
 <p>A colortable assigns a name and an RGBA color to a set of labels. Such a colortable is included in an annotation (brain atlas), but there also is a separate ASCII text file format for these LUTs. An example file in the format is <code>FREESURFER_HOME/FreeSurferColorLUT.txt</code>. To read such a file:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1">lutfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;colorlut.txt&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb36-2" data-line-number="2">colortable =<span class="st"> </span><span class="kw">read.fs.colortable</span>(lutfile, <span class="dt">compute_colorcode=</span><span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb36-3" data-line-number="3"><span class="kw">head</span>(colortable);</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lutfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;colorlut.txt&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
+colortable =<span class="st"> </span><span class="kw">read.fs.colortable</span>(lutfile, <span class="dt">compute_colorcode=</span><span class="ot">TRUE</span>);
+<span class="kw">head</span>(colortable);</code></pre></div>
 <pre><code>##   struct_index                struct_name   r   g   b a     code
 ## 1            0                    Unknown   0   0   0 0        0
 ## 2            1     Left-Cerebral-Exterior  70 130 180 0 11829830
@@ -514,10 +306,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 5            4     Left-Lateral-Ventricle 120  18 134 0  8786552
 ## 6            5          Left-Inf-Lat-Vent 196  58 250 0 16399044</code></pre>
 <p>You can also extract such a colortable from an annotation:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1">annotfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.aparc.annot.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb38-2" data-line-number="2">annot =<span class="st"> </span><span class="kw">read.fs.annot</span>(annotfile);</a>
-<a class="sourceLine" id="cb38-3" data-line-number="3">colortable =<span class="st"> </span><span class="kw">colortable.from.annot</span>(annot);</a>
-<a class="sourceLine" id="cb38-4" data-line-number="4"><span class="kw">head</span>(colortable);</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">annotfile =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.aparc.annot.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
+annot =<span class="st"> </span><span class="kw">read.fs.annot</span>(annotfile);
+colortable =<span class="st"> </span><span class="kw">colortable.from.annot</span>(annot);
+<span class="kw">head</span>(colortable);</code></pre></div>
 <pre><code>##   struct_index             struct_name   r   g   b a
 ## 1            0                 unknown  25   5  25 0
 ## 2            1                bankssts  25 100  40 0

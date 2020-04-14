@@ -4,7 +4,7 @@
 #'
 #' @param filepath string. Full path to the input MGZ or MGH file.
 #'
-#' @param is_gzipped a logical value (TRUE or FALSE) or the string 'AUTO'. Whether to treat the input file as gzipped, i.e., MGZ instead of MGH format. Defaults to 'AUTO', which tries to determine this from the last three characters of the 'filepath' parameter. Files with extensions 'mgz' and '.gz' (in arbitrary case) are treated as MGZ format, all other files are treated as MGH. In the special case that 'filepath' has less than three characters, MGH is assumed.
+#' @param is_gzipped a logical value or the string 'AUTO'. Whether to treat the input file as gzipped, i.e., MGZ instead of MGH format. Defaults to 'AUTO', which tries to determine this from the last three characters of the 'filepath' parameter. Files with extensions 'mgz' and '.gz' (in arbitrary case) are treated as MGZ format, all other files are treated as MGH. In the special case that 'filepath' has less than three characters, MGH is assumed.
 #'
 #' @param flatten logical. Whether to flatten the return volume to a 1D vector. Useful if you know that this file contains 1D morphometry data.
 #'
@@ -32,6 +32,10 @@
 #'
 #' @export
 read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_header=FALSE, drop_empty_dims=FALSE) {
+
+    if(! is.character(filepath)) {
+      stop("Parameter 'filepath' msut be a character string.")
+    }
 
 
     header = list();
@@ -81,7 +85,9 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_hea
         header$internal$ysize = delta[2];
         header$internal$zsize = delta[3];
 
-        Mdc = readBin(fh, numeric(), n = 9, size = 4, endian = "big");    # vector of length 9:  x_r, x_a, x_s, y_r, y_a, y_s, z_r, z_a, z_s. Note: gets turned into 3x3 matrix below
+        # Mdc is the 'matrix of direction cosines'.
+        # When read, it is a vector of length 9:  x_r, x_a, x_s, y_r, y_a, y_s, z_r, z_a, z_s. Note: gets turned into 3x3 matrix below.
+        Mdc = readBin(fh, numeric(), n = 9, size = 4, endian = "big");
         header$internal$x_r = Mdc[1];
         header$internal$x_a = Mdc[2];
         header$internal$x_s = Mdc[3];
@@ -92,17 +98,32 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_hea
         header$internal$z_a = Mdc[8];
         header$internal$z_s = Mdc[9];
 
+        # The vox2ras matrix is:
+        #
+        #  x_r*xs y_r*ys  z_r*zs  c_r
+        #  x_a*xs y_a*ys  z_a*zs  c_a
+        #  x_s*xs y_s*ys  z_s*zs  c_s
+        #  0      0       0       1
+        #
+        # ...where:
+        #   * c_r, c_a, c_s are the coordinates of the (center of the) voxel at CRS=0,0,0.
+        #   * xs, ys, zs are the xsize, ysize and zsize of the voxels
+
         Mdc = matrix(Mdc, nrow=3, byrow = FALSE); # turn Mdc into 3x3 matrix
 
-        Pxyz_c = readBin(fh, numeric(), n = 3, size = 4, endian = "big"); # 1x3 vector:  c_r, c_a, c_s
+        Pxyz_c = readBin(fh, numeric(), n = 3, size = 4, endian = "big"); # 1x3 vector:  c_r, c_a, c_s. This is the RAS coordinate at the center voxel, also known as CRAS.
         header$internal$c_r = Pxyz_c[1];
         header$internal$c_a = Pxyz_c[2];
         header$internal$c_s = Pxyz_c[3];
 
-        D = diag(delta);
-        Pcrs_c = c(ndim1/2, ndim2/2, ndim3/2); # CRS of the center voxel
-        Mdc_scaled = Mdc %*% D;
-        Pxyz_0 = Pxyz_c - (Mdc_scaled %*% Pcrs_c); # the x,y,z location at CRS=0
+        D = diag(delta);   # D is the matrix of voxel sizes. Note that delta=(xsize, ysize, zsize).
+        Pcrs_c = c(ndim1/2, ndim2/2, ndim3/2); # CRS indices of the center voxel
+        Mdc_scaled = Mdc %*% D; # Scaled by the voxel dimensions (xsize, ysize, zsize)
+        Pxyz_0 = Pxyz_c - (Mdc_scaled %*% Pcrs_c); # the x,y,z location at CRS=0,0,0 (also known as P0 RAS or 'first voxel RAS').
+        # Note: in R, it's actually CRS=1,1,1.
+        # Good to know: The 3 voxel indices of the CRS are often called 'i, j, k'. (While this is true for
+        # indices in general, in the context of MRI transformation matrices, you can assume that 'CRS' is meant when some comment
+        # or function states that data is 'transformed from ijk to RAS' or talks about 'the voxel at ijk=0').
 
         M = matrix(rep(0, 16), nrow=4);
         M[1:3,1:3] = as.matrix(Mdc_scaled);
@@ -126,6 +147,7 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_hea
         header$internal$width = ndim1;   # size in number of voxels in that dimensions (256 for conformed volumes)
         header$internal$height = ndim2;
         header$internal$depth = ndim3;
+        header$internal$nframes = nframes;
 
         x_half_length = header$internal$width / 2.0 * header$internal$xsize;
         y_half_length = header$internal$height / 2.0 * header$internal$ysize;
@@ -140,13 +162,13 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_hea
         xfov = header$internal$xend - header$internal$xstart;
         yfov = header$internal$yend - header$internal$ystart;
         zfov = header$internal$zend - header$internal$zstart;
-
+        header$internal$fov = ifelse(xfov > yfov, ifelse(xfov > zfov, xfov, zfov), ifelse(yfov > zfov, yfov, zfov));
 
         orientation_info = get.slice.orientation(Mdc);
         header$internal$slice_orientation_string = orientation_info$orientation_string;
         header$internal$slice_direction_name = orientation_info$direction_name;
 
-        header$internal$fov = ifelse(xfov > yfov, ifelse(xfov > zfov, xfov, zfov), ifelse(yfov > zfov, yfov, zfov));
+
 
 
         header$vox2ras_matrix = as.matrix(M);
@@ -174,10 +196,10 @@ read.fs.mgh <- function(filepath, is_gzipped = "AUTO", flatten = FALSE, with_hea
     header$voldim = volsz;   # May change later due to drop or flatten parameters
 
     # Determine size of voxel data, depending on dtype from header above
-    MRI_UCHAR = 0L;
-    MRI_INT = 1L;
-    MRI_FLOAT = 3L;
-    MRI_SHORT = 4L;
+    MRI_UCHAR = translate.mri.dtype("MRI_UCHAR");
+    MRI_INT = translate.mri.dtype("MRI_INT");
+    MRI_FLOAT = translate.mri.dtype("MRI_FLOAT");
+    MRI_SHORT = translate.mri.dtype("MRI_SHORT");
 
     dt_explanation = "0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT";
     dtype_name = translate.mri.dtype(dtype); # Validate that the dtype. Will stop if not.
@@ -278,7 +300,7 @@ get.slice.orientation <- function(Mdc) {
   for (char_idx in seq.int(3)) {
     sagittal = Mdc[1, char_idx];   # LR axis
     coronal = Mdc[2, char_idx];    # PA axis
-    axial = Mdc[3, char_idx];      # IS axis
+    axial = Mdc[3, char_idx];      # IS  axis
 
     if ((abs(sagittal) > abs(coronal)) & (abs(sagittal) > abs(axial))) {
       orientation[char_idx] = ifelse(sagittal > 0, 'R', 'L');
@@ -319,6 +341,9 @@ mgh.is.conformed <- function(mgh_header, voxel_size_tolerance=1e-4) {
   if(is.null(mgh_header$ras_good_flag) | mgh_header$ras_good_flag < 1L) {
     return(FALSE);
   }
+
+  mgh_header$internal$slice_direction_name = mghheader.primary.slice.direction(mgh_header);
+
   if(mgh_header$internal$slice_direction_name != "coronal") {
     return(FALSE);
   }
@@ -396,7 +421,7 @@ print.fs.volume <- function(x, ...) {
   # vox2ras
   if(x$header$ras_good_flag == 1) {
     cat(sprintf(" - Header contains vox2ras transformation information. Voxel size is %.2f x %.2f x %.2f mm.\n", x$header$internal$xsize, x$header$internal$ysize, x$header$internal$zsize));
-    info_conformed = ifelse(x$header$internal$is_conformed == 1L, "is conformed", "is not conformed");
+    info_conformed = ifelse(mghheader.is.conformed(x$header), "is conformed", "is not conformed");
     cat(sprintf(" - Volume %s, pimary slice direction is '%s', orientation is '%s'.\n", info_conformed, x$header$internal$slice_direction_name, x$header$internal$slice_orientation_string));
   } else {
     cat(sprintf(" - Header does not contain vox2ras transformation information.\n"));
@@ -404,7 +429,12 @@ print.fs.volume <- function(x, ...) {
 
   # mr_params
   if(x$header$has_mr_params == 1) {
-    cat(sprintf(" - Header contains MR acquisition parameters: TR: %.2f msec, TE: %.2f msec, TI: %.2f msec, flip angle: %.2f degrees, fov = %.3f.\n", x$header$mr$tr, x$header$mr$te, x$header$mr$ti, x$header$mr$flip_angle_degrees, x$header$mr$fov));
+    tr = ifelse(is.null(x$header$mr$tr), NA, x$header$mr$tr);
+    te = ifelse(is.null(x$header$mr$te), NA, x$header$mr$te);
+    ti = ifelse(is.null(x$header$mr$ti), NA, x$header$mr$ti);
+    flip_angle_degrees = ifelse(is.null(x$header$mr$flip_angle_degrees), NA, x$header$mr$flip_angle_degrees);
+    fov = ifelse(is.null(x$header$mr$fov), NA, x$header$mr$fov);
+    cat(sprintf(" - Header contains MR acquisition parameters: TR: %.2f msec, TE: %.2f msec, TI: %.2f msec, flip angle: %.2f degrees, fov = %.3f.\n", tr, te, ti, flip_angle_degrees, fov));
   } else {
     cat(sprintf(" - Header does not contain MR acquisition parameters.\n"));
   }

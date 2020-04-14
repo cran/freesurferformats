@@ -9,6 +9,8 @@
 #'
 #' @param faces n x 3 matrix of integers. Each row defined the 3 vertex indices that make up the face. WARNING: Vertex indices should be given in R-style, i.e., the index of the first vertex is 1. However, they will be written in FreeSurfer style, i.e., all indices will have 1 substracted, so that the index of the first vertex will be zero.
 #'
+#' @param format character string, the format to use. One of 'bin' for FreeSurfer binary surface format, 'asc' for FreeSurfer ASCII format, 'vtk' for VTK ASCII legacy format, or 'auto' to derive the format from the file extension given in parameter 'filepath'. With 'auto', a path ending in '.asc' is interpreted as 'asc', a path ending in '.vtk' as vtk, and everything else as 'bin'.
+#'
 #' @return string the format that was written. One of "tris" or "quads". Currently only triangular meshes are supported, so always 'tris'.
 #'
 #' @family mesh functions
@@ -25,10 +27,23 @@
 #' }
 #'
 #' @export
-write.fs.surface <- function(filepath, vertex_coords, faces) {
-  TRIS_MAGIC_FILE_TYPE_NUMBER = 16777214;
-  OLD_QUAD_MAGIC_FILE_TYPE_NUMBER = 16777215;
-  NEW_QUAD_MAGIC_FILE_TYPE_NUMBER = 16777213;
+write.fs.surface <- function(filepath, vertex_coords, faces, format='auto') {
+
+  if(!(format %in% c('auto', 'bin', 'asc', 'vtk'))) {
+    stop("Format must be one of c('auto', 'bin', 'asc', 'vtk').");
+  }
+
+  if(format == 'asc' | (format == 'auto' & filepath.ends.with(filepath, c('.asc')))) {
+    return(write.fs.surface.asc(filepath, vertex_coords, faces));
+  }
+
+  if(format == 'vtk' | (format == 'auto' & filepath.ends.with(filepath, c('.vtk')))) {
+    return(write.fs.surface.vtk(filepath, vertex_coords, faces));
+  }
+
+  TRIS_MAGIC_FILE_TYPE_NUMBER = 16777214L;
+  OLD_QUAD_MAGIC_FILE_TYPE_NUMBER = 16777215L;
+  NEW_QUAD_MAGIC_FILE_TYPE_NUMBER = 16777213L;
 
   num_faces_with_index_zero = sum(faces==0);
   if(num_faces_with_index_zero > 0) {
@@ -125,6 +140,59 @@ write.fs.surface.asc <- function(filepath, vertex_coords, faces) {
   write.table(vertex_coords, file = filepath, append = TRUE, quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE);
 
   # Append the face data
+  write.table(faces, file = filepath, append = TRUE, quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE);
+
+  return(invisible('tris'));
+}
+
+
+#' @title Write mesh to file in VTK ASCII format
+#'
+#' @param filepath string. Full path to the output surface file, should end with '.vtk', but that is not enforced.
+#'
+#' @param vertex_coords n x 3 matrix of doubles. Each row defined the x,y,z coords for a vertex.
+#'
+#' @param faces n x 3 matrix of integers. Each row defined the 3 vertex indices that make up the face. WARNING: Vertex indices should be given in R-style, i.e., the index of the first vertex is 1. However, they will be written in FreeSurfer style, i.e., all indices will have 1 substracted, so that the index of the first vertex will be zero.
+#'
+#' @return string the format that was written. One of "tris" or "quads". Currently only triangular meshes are supported, so always 'tris'.
+#'
+#' @family mesh functions
+#'
+#' @examples
+#' \donttest{
+#'     # Read a surface from a file:
+#'     surface_file = system.file("extdata", "lh.tinysurface",
+#'      package = "freesurferformats", mustWork = TRUE);
+#'     mesh = read.fs.surface(surface_file);
+#'
+#'     # Now save it:
+#'     write.fs.surface.vtk(tempfile(fileext=".vtk"), mesh$vertices, mesh$faces);
+#' }
+#'
+#' @export
+write.fs.surface.vtk <- function(filepath, vertex_coords, faces) {
+
+  fh = file(filepath, "w");
+
+  num_verts = nrow(vertex_coords);
+  num_faces = nrow(faces);
+
+  # write header
+  writeLines(c("# vtk DataFile Version 1.0", "fsbrain output", "ASCII", "DATASET POLYDATA", sprintf("POINTS %d float", num_verts)), fh);
+  close(fh);
+
+
+  # Append the vertex data
+  write.table(vertex_coords, file = filepath, append = TRUE, quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE);
+
+  fh = file(filepath, "a");
+  writeLines(c(sprintf("POLYGONS %d %d", num_faces, num_faces * 4L)), fh);
+  close(fh);
+
+  # Append the face data
+
+  faces = faces - 1L;       # from R to 0-based indices
+  faces = cbind(3L, faces); # in VTK format, each face line starts with the number of vertices
   write.table(faces, file = filepath, append = TRUE, quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE);
 
   return(invisible('tris'));
