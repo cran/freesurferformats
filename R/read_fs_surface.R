@@ -5,6 +5,8 @@
 #'
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
 #'
+#' @note This is also known as *srf* format.
+#'
 #' @family mesh functions
 #'
 #' @export
@@ -36,11 +38,13 @@ read.fs.surface.asc <- function(filepath) {
 
 #' @title Read VTK ASCII format mesh as surface.
 #'
-#' @description This reads meshes (vtk polygon datasets) from text files in VTK ASCII format. See https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf for format spec. Note that this function does **not** read arbitrary VTK datasets, i.e., it supports only a subset of the possible contents of VTK files (i.e., polygon meshes).
+#' @description This reads meshes (vtk polygon datasets) from text files in VTK ASCII format. See \url{https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf} for format spec. Note that this function does **not** read arbitrary VTK datasets, i.e., it supports only a subset of the possible contents of VTK files (i.e., polygon meshes).
 #'
 #' @param filepath string. Full path to the input surface file in VTK ASCII format.
 #'
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
+#'
+#' @note This is by far not a complete VTK format reader.
 #'
 #' @family mesh functions
 #'
@@ -87,7 +91,7 @@ read.fs.surface.vtk <- function(filepath) {
   }
 
   if(any(faces_df$num_verts != 3L)) {
-    stop("The mesh in the VTK file contains POLYGONS with are not triangles. Only triangular meshes are supported by this function.");
+    stop("The mesh in the VTK file contains POLYGONS which are not triangles. Only triangular meshes are supported by this function.");
   }
 
 
@@ -97,6 +101,122 @@ read.fs.surface.vtk <- function(filepath) {
   class(ret_list) = c("fs.surface", class(ret_list));
 
   return(ret_list);
+}
+
+
+#' @title Read Stanford PLY format mesh as surface.
+#'
+#' @description This reads meshes from text files in PLY format. Note that this does not read arbitrary data from PLY files, i.e., PLY files can store data that is not supported by this function.
+#'
+#' @param filepath string. Full path to the input surface file in Stanford Triangle (PLY) format.
+#'
+#' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
+#'
+#' @family mesh functions
+#'
+#' @note This is by far not a complete PLY format reader. It can read PLY mesh files which were written by \code{\link[freesurferformats]{write.fs.surface.ply}} and Blender. Vertex colors and Blender vertex normals are currently ignored (but files with them are supported in the sense that the mesh data will be read correctly).
+#'
+#' @export
+read.fs.surface.ply <- function(filepath) {
+
+  ply_lines = readLines(filepath);
+  header_info = read.element.counts.ply.header(ply_lines);
+
+  num_verts = header_info$num_verts;
+  num_faces = header_info$num_faces;
+  header_end_line_index = header_info$header_end_line_index;
+  contains_vertex_colors = header_info$contains_vertex_colors;
+  contains_vertex_normals = header_info$contains_vertex_normals;
+
+  vertices_df = NULL;
+  faces_df = NULL;
+
+  current_line_idx = header_end_line_index;
+  if(contains_vertex_colors & contains_vertex_normals) {
+    vertices_df = read.table(filepath, skip=current_line_idx, col.names = c('coord1', 'coord2', 'coord3', 'nx', 'ny', 'nz', 'r', 'g', 'b', 'a'), colClasses = c("numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "integer", "integer", "integer", "integer"), nrows=num_verts);
+  } else if(contains_vertex_colors) {
+    vertices_df = read.table(filepath, skip=current_line_idx, col.names = c('coord1', 'coord2', 'coord3', 'r', 'g', 'b', 'a'), colClasses = c("numeric", "numeric", "numeric", "integer", "integer", "integer", "integer"), nrows=num_verts);
+  } else if(contains_vertex_normals) {
+    vertices_df = read.table(filepath, skip=current_line_idx, col.names = c('coord1', 'coord2', 'coord3', 'nx', 'ny', 'nz'), colClasses = c("numeric", "numeric", "numeric", "numeric", "numeric", "numeric"), nrows=num_verts);
+  } else {
+    vertices_df = read.table(filepath, skip=current_line_idx, col.names = c('coord1', 'coord2', 'coord3'), colClasses = c("numeric", "numeric", "numeric"), nrows=num_verts);
+  }
+
+  current_line_idx = current_line_idx + nrow(vertices_df);
+  faces_df = read.table(filepath, skip=current_line_idx, col.names = c('num_verts', 'vertex1', 'vertex2', 'vertex3'), colClasses = c("integer", "integer", "integer", "integer"), nrows=num_faces);
+
+  current_line_idx = current_line_idx + nrow(faces_df);
+
+  if(current_line_idx != length(ply_lines)) {
+    warning(sprintf("At line %d after reading vertices and faces, but PLY file has %d lines. Ignored remaining lines.\n", current_line_idx, length(ply_lines)));
+  }
+
+  if(is.null(vertices_df) | is.null(faces_df)) {
+    stop("PLY file did not contain a complete mesh dataset (vertices or faces missing).");
+  }
+
+  if(any(faces_df$num_verts != 3L)) {
+    stop("The mesh in the PLY file contains faces which are not triangles. Only triangular meshes are supported by this function.");
+  }
+
+
+  ret_list = list();
+  ret_list$vertices = unname(data.matrix(vertices_df[1:3]));
+  ret_list$faces = unname(data.matrix(faces_df[2:4])) + 1L;  # the +1 is because the surface should use R indices (one-based)
+  class(ret_list) = c("fs.surface", class(ret_list));
+
+  return(ret_list);
+}
+
+
+#' @title Determine element counts from PLY file header.
+#'
+#' @param ply_lines vector character strings, all lines of the PLY file
+#'
+#' @keywords internal
+read.element.counts.ply.header <- function(ply_lines) {
+  if(length(ply_lines) < 9L) {
+    stop("The file is not a valid PLY mesh file: it does not contain the 9 header lines.");
+    # 9 lines are required for the mandatory header fields and the lines defining the vertex and face properties.
+  }
+  if(ply_lines[1] != "ply") {
+    stop("The file is not a valid PLY file: first line does not read 'ply'.");
+  }
+  if(ply_lines[2] != "format ascii 1.0") {
+    stop("The file is not a valid PLY file in supported format: second line does not read 'format ascii 1.0'.");
+  }
+
+  if(length(which(ply_lines == "end_header")) != 1L) {
+    stop("The file is not a valid PLY file in supported format: could not find header termination string.");
+  } else {
+    header_end_line_index = which(ply_lines == "end_header");
+  }
+
+  if(length(ply_lines) == header_end_line_index) {
+    stop("PLY file contains no data elements.");
+  }
+
+  header_lines = ply_lines[1L:header_end_line_index];
+
+  vertex_count_line_index = which(startsWith(header_lines, "element vertex"));
+  if(length(vertex_count_line_index) != 1L) {
+    stop("The file is not a valid PLY file in supported format: could not find vertex count header line.");
+  }
+  vertex_count_line_words = strsplit(ply_lines[vertex_count_line_index], " ")[[1]];
+  vertex_count = as.integer(vertex_count_line_words[3]);
+
+
+  face_count_line_index = which(startsWith(header_lines, "element face"));
+  if(length(face_count_line_index) != 1L) {
+    stop("The file is not a valid PLY file in supported format: could not find face count header line.");
+  }
+  face_count_line_words = strsplit(ply_lines[face_count_line_index], " ")[[1]];
+  face_count = as.integer(face_count_line_words[3]);
+
+  file_contains_vertex_colors = length(which(header_lines == "property uchar red")) == 1L;
+  file_contains_vertex_normals = length(which(header_lines == "property float nx")) == 1L; # vertex normals as exported by Blender
+
+  return(list('header_end_line_index'=header_end_line_index, 'num_verts'=vertex_count, 'num_faces'=face_count, 'contains_vertex_colors'=file_contains_vertex_colors, 'contains_vertex_normals'=file_contains_vertex_normals));
 }
 
 
@@ -122,8 +242,8 @@ read.fs.surface.vtk <- function(filepath) {
 #' @export
 read.fs.surface <- function(filepath, format='auto') {
 
-  if(!(format %in% c('auto', 'bin', 'asc', 'vtk'))) {
-    stop("Format must be one of c('auto', 'bin', 'asc').");
+  if(!(format %in% c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii'))) {
+    stop("Format must be one of c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii').");
   }
 
   if(format == 'asc' | (format == 'auto' & filepath.ends.with(filepath, c('.asc')))) {
@@ -132,6 +252,14 @@ read.fs.surface <- function(filepath, format='auto') {
 
   if(format == 'vtk' | (format == 'auto' & filepath.ends.with(filepath, c('.vtk')))) {
     return(read.fs.surface.vtk(filepath));
+  }
+
+  if(format == 'ply' | (format == 'auto' & filepath.ends.with(filepath, c('.ply')))) {
+    return(read.fs.surface.ply(filepath));
+  }
+
+  if(format == 'gii' | (format == 'auto' & filepath.ends.with(filepath, c('.gii')))) {
+    return(read.fs.surface.gii(filepath));
   }
 
   TRIS_MAGIC_FILE_TYPE_NUMBER = 16777214L;
@@ -277,13 +405,15 @@ faces.quad.to.tris <- function(quad_faces) {
 }
 
 
-#' Convert tris faces to quad faces.
+#' @title Convert tris faces to quad faces by simple merging.
 #'
 #' @description This is experimental. Note that it can only work if the number of 'tris_faces' is even, as two consecutive tris-faces will be merged into one quad face. We could set the index to NA in that case, but I do not know how FreeSurfer handles this, so we do not guess.
 #'
 #' @param tris_faces *nx3* integer matrix, the indices of the vertices making up the *n* tris faces.
 #'
 #' @return n/2x4 integer matrix, the indices of the vertices making up the *n* quad faces.
+#'
+#' @note This function does not implement proper remeshing of tri-meshes to quad-meshes. Use a proper mesh library if you need that.
 #'
 #' @keywords internal
 faces.tris.to.quad <- function(tris_faces) {
@@ -315,3 +445,22 @@ faces.tris.to.quad <- function(tris_faces) {
 is.fs.surface <- function(x) inherits(x, "fs.surface")
 
 
+#' @title Read GIFTI format mesh as surface.
+#'
+#' @param filepath string. Full path to the input surface file in GIFTI format.
+#'
+#' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
+#'
+#' @family mesh functions
+#'
+#' @export
+read.fs.surface.gii <- function(filepath) {
+  if (requireNamespace("gifti", quietly = TRUE)) {
+    gii = gifti::read_gifti(filepath);
+    ret_list = list("vertices" = gii$data$pointset, "faces" = matrix(as.integer(gii$data$triangle + 1L), ncol=3L), "mesh_face_type" = 'tris');
+    class(ret_list) = c("fs.surface", class(ret_list));
+    return(ret_list);
+  } else {
+    stop("Reading GIFTI format surface files requires the package 'gifti' to be installed.");
+  }
+}

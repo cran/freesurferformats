@@ -13,10 +13,10 @@ write.fs.surface(filepath, vertex_coords, faces, format = "auto")
 
 \item{faces}{n x 3 matrix of integers. Each row defined the 3 vertex indices that make up the face. WARNING: Vertex indices should be given in R-style, i.e., the index of the first vertex is 1. However, they will be written in FreeSurfer style, i.e., all indices will have 1 substracted, so that the index of the first vertex will be zero.}
 
-\item{format}{character string, the format to use. One of 'bin' for FreeSurfer binary surface format, 'asc' for FreeSurfer ASCII format, 'vtk' for VTK ASCII legacy format, or 'auto' to derive the format from the file extension given in parameter 'filepath'. With 'auto', a path ending in '.asc' is interpreted as 'asc', a path ending in '.vtk' as vtk, and everything else as 'bin'.}
+\item{format}{character string, the format to use. One of 'bin' for FreeSurfer binary surface format, 'asc' for FreeSurfer ASCII format, 'vtk' for VTK ASCII legacy format, 'ply' for Standford PLY format, 'off' for Object File Format, 'obj' for Wavefront object format, 'gii' for GIFTI format, or 'auto' to derive the format from the file extension given in parameter 'filepath'. With 'auto', a path ending in '.asc' is interpreted as 'asc', a path ending in '.vtk' as vtk, and so on for the other formats. Everything not matching any of these is interpreted as 'bin', i.e., FreeSurfer binary surface format.}
 }
 \value{
-string the format that was written. One of "tris" or "quads". Currently only triangular meshes are supported, so always 'tris'.
+character string, the format that was written. One of "tris" or "quads". Currently only triangular meshes are supported, so always 'tris'.
 }
 \description{
 Write vertex coordinates and vertex indices defining faces to a file in FreeSurfer binary surface format.
@@ -37,11 +37,20 @@ Write vertex coordinates and vertex indices defining faces to a file in FreeSurf
 \seealso{
 Other mesh functions: 
 \code{\link{read.fs.surface.asc}()},
+\code{\link{read.fs.surface.gii}()},
+\code{\link{read.fs.surface.ply}()},
 \code{\link{read.fs.surface.vtk}()},
 \code{\link{read.fs.surface}()},
 \code{\link{read_nisurfacefile}()},
 \code{\link{read_nisurface}()},
 \code{\link{write.fs.surface.asc}()},
+\code{\link{write.fs.surface.gii}()},
 \code{\link{write.fs.surface.vtk}()}
+
+Other mesh export functions: 
+\code{\link{write.fs.surface.obj}()},
+\code{\link{write.fs.surface.off}()},
+\code{\link{write.fs.surface.ply}()}
 }
+\concept{mesh export functions}
 \concept{mesh functions}

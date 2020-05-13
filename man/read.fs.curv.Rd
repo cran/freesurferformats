@@ -15,14 +15,14 @@ read.fs.curv(filepath, format = "auto")
 data vector of floats. The brain morphometry data, one value per vertex.
 }
 \description{
-Read vertex-wise brain morphometry data from a file in FreeSurfer 'curv' format. Bboth binary and ASCII versions are supported.
+Read vertex-wise brain morphometry data from a file in FreeSurfer 'curv' format. Both the binary and ASCII versions are supported.
    For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.thickness', which contains n values. Each value represents the cortical thickness at the respective vertex in the brain surface mesh of bert.
 }
 \examples{
     curvfile = system.file("extdata", "lh.thickness",
                             package = "freesurferformats", mustWork = TRUE);
     ct = read.fs.curv(curvfile);
-    cat(sprintf("Read data for \%d vertices. Values: min=\%f, mean=\%f, max=\%f.\\n",
+    cat(sprintf("Read data for \%d vertices. Values: min=\%f, mean=\%f, max=\%f.\n",
                             length(ct), min(ct), mean(ct), max(ct)));
 
 }
@@ -31,7 +31,9 @@ Other morphometry functions:
 \code{\link{fs.get.morph.file.ext.for.format}()},
 \code{\link{fs.get.morph.file.format.from.filename}()},
 \code{\link{read.fs.mgh}()},
+\code{\link{read.fs.morph.gii}()},
 \code{\link{read.fs.morph}()},
+\code{\link{read.fs.volume}()},
 \code{\link{read.fs.weight}()},
 \code{\link{write.fs.curv}()},
 \code{\link{write.fs.mgh}()},

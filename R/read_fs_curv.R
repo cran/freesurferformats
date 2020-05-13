@@ -1,6 +1,6 @@
 #' @title Read file in FreeSurfer curv format
 #'
-#' @description Read vertex-wise brain morphometry data from a file in FreeSurfer 'curv' format. Bboth binary and ASCII versions are supported.
+#' @description Read vertex-wise brain morphometry data from a file in FreeSurfer 'curv' format. Both the binary and ASCII versions are supported.
 #'    For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.thickness', which contains n values. Each value represents the cortical thickness at the respective vertex in the brain surface mesh of bert.
 #'
 #' @param filepath string. Full path to the input curv file. Note: gzipped binary curv files are supported and gz binary format is assumed if the filepath ends with ".gz".
@@ -59,6 +59,8 @@ read.fs.curv <- function(filepath, format='auto') {
 #'
 #' @return numeric vector, the curv data
 #'
+#' @note This format is also known as *dpv* (data-per-vertex) format.
+#'
 #' @keywords internal
 read.fs.curv.asc <- function(filepath) {
   curv_df = read.table(filepath, header=FALSE, col.names=c("vert_index", "coord_x", "coord_y", "coord_z", "morph_data"), colClasses = c("integer", "numeric", "numeric", "numeric", "numeric"));
@@ -104,6 +106,8 @@ fread3 <- function(filehandle) {
 #'
 #' @param filepath, string. Full path to the input file. The suffix determines the expected format as follows: ".mgz" and ".mgh" will be read with the read.fs.mgh function, all other file extensions will be read with the read.fs.curv function.
 #'
+#' @param format character string, the format to use. One of c("auto", "mgh", "mgz", "curv", "gii"). The default setting "auto" will determine the format from the file extension.
+#'
 #' @return data, vector of floats. The brain morphometry data, one value per vertex.
 #'
 #' @examples
@@ -123,14 +127,58 @@ fread3 <- function(filehandle) {
 #' @family morphometry functions
 #'
 #' @export
-read.fs.morph <- function(filepath) {
-    format = fs.get.morph.file.format.from.filename(filepath);
-    return_list = list();
+read.fs.morph <- function(filepath, format='auto') {
+    if(! format %in% c("auto", "mgh", "mgz", "curv", "gii")) {
+        stop("Format must be one of 'auto', 'mgh', 'mgz', 'curv', or 'gii'.");
+    }
+
+    if(format == 'auto') {
+        format = fs.get.morph.file.format.from.filename(filepath);
+    }
+
     if(format == "mgh" || format=="mgz") {
         data = read.fs.mgh(filepath, flatten=TRUE);
-    }
-    else {
+    } else if(format == "gii") {
+        data = read.fs.morph.gii(filepath);
+    } else {
         data = read.fs.curv(filepath);
     }
     return(data);
+}
+
+
+#' @title Read morphometry data file in GIFTI format.
+#'
+#' @description Read vertex-wise brain surface data from a GIFTI file. The file must be a GIFTI *func* file (not a GIFTI *surf* file containing a mesh, use \code{\link[freesurferformats]{read_nisurface}} for loading GIFTI surf files).
+#'
+#' @param filepath, string. Full path to the input GIFTI file.
+#'
+#' @param element_index integer, the element to load in case the GIFTI file containes several datasets (usually time series). Defaults to the first element, 1L.
+#'
+#' @return data, vector of double or integer. The brain morphometry data, one value per vertex. The data type depends on the data type in the file.
+#'
+#' @note This function requires the `gifti` package, which is an optional dependency, to be installed. It also assumes that the dataset contains a vector or a matrix/array in which all dimensions except for 1 are empty.
+#'
+#' @family morphometry functions
+#'
+#' @export
+read.fs.morph.gii <- function(filepath, element_index=1L) {
+  if(element_index < 1L) {
+    stop("Parameter 'element_index' must be a positive integer.");
+  }
+  if (requireNamespace("gifti", quietly = TRUE)) {
+      # Try to read via gifti package
+      gii = gifti::read_gifti(filepath);
+      if(element_index > length(gii$data)) {
+        stop(sprintf("Requested data element at index '%d', but GIFTI file contains %d elements only.\n", element_index, length(gii$data)));
+      }
+      # Data may be stored in a matrix or higher dim array (with empty dimensions in case of vertex-wise data). Drop the empty dims to get a vector.
+      morph_data = drop(gii$data[[element_index]]);
+      if(! is.null(dim(morph_data))) {
+        stop("Dropping empty dimensions of the GIFTI data did not result in a vector. The data in the file cannot be interpreted as scalar per-vertex data.");
+      }
+      return(morph_data);
+  } else {
+    stop("Reading files in GIFTI format requires the 'gifti' package to be installed.");
+  }
 }

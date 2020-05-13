@@ -29,10 +29,13 @@ Tries to read the file with all implemented surface format reader methods. The f
 \seealso{
 Other mesh functions: 
 \code{\link{read.fs.surface.asc}()},
+\code{\link{read.fs.surface.gii}()},
+\code{\link{read.fs.surface.ply}()},
 \code{\link{read.fs.surface.vtk}()},
 \code{\link{read.fs.surface}()},
 \code{\link{read_nisurface}()},
 \code{\link{write.fs.surface.asc}()},
+\code{\link{write.fs.surface.gii}()},
 \code{\link{write.fs.surface.vtk}()},
 \code{\link{write.fs.surface}()}
 }

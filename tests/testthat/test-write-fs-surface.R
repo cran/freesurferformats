@@ -1,14 +1,6 @@
-#' @title Determine whether a test is running on CRAN under macos
-#'
-#' @description We are currently getting failed unit tests on CRAN under macos, while the package works under MacOS on both <https://builder.r-hub.io/> and on our MacOS machines. This is because the package file cache does not work on CRAN, as the HOME is mounted read-only on the CRAN test systems. So we have to skip the tests that require optional data under MacOS on CRAN.
-#'
-#' @return logical, whether a test is running on CRAN under MacOS
-tests_running_on_cran_under_macos <- function() {
-  return(tolower(Sys.info()[["sysname"]]) == 'darwin' && !identical(Sys.getenv("NOT_CRAN"), "true"));
-}
 
 test_that("One can write triangular surface data", {
-  vertex_coords = matrix(seq(1, 15)+0.5, nrow=3, byrow=TRUE);
+  vertex_coords = matrix(seq(1, 15)+0.5, ncol=3, byrow=TRUE);
   faces = matrix(c(1L,2L,3L,2L,4L,3L,4L,5L,3L), nrow=3, byrow = TRUE);
 
   format_written = write.fs.surface(tempfile(fileext="white"), vertex_coords, faces);
@@ -87,5 +79,52 @@ test_that("Surface files in VTK format can be read and written", {
   surf_re = read.fs.surface(tmp_vtk_file);
   expect_equal(surf$vertices, surf_re$vertices);
   expect_equal(surf$faces, surf_re$faces);
+})
+
+
+test_that("One can export surface meshes in OFF, OBJ and PLY formats", {
+
+  surface_file = system.file("extdata", "lh.tinysurface", package = "freesurferformats", mustWork = TRUE);
+  mesh = read.fs.surface(surface_file);
+
+  # Standford PLY format without vertex colors
+  write.fs.surface.ply(tempfile(fileext=".ply"), mesh$vertices, mesh$faces);
+
+  # PLY with vertex colors
+  vertex_colors = matrix(rep(82L, 5*4), ncol=4);    # the mesh contains 5 verts
+  write.fs.surface.ply(tempfile(fileext=".ply"), mesh$vertices, mesh$faces, vertex_colors=vertex_colors);
+
+  # OFF, the Object File Format
+  write.fs.surface.off(tempfile(fileext=".off"), mesh$vertices, mesh$faces);
+
+  # Wavefront OBJ format
+  write.fs.surface.obj(tempfile(fileext=".obj"), mesh$vertices, mesh$faces);
+
+  # currently this test only ensures that the functions run without error, the output is not checked in detail yet.
+  # You can import the PLY and OBJ files into Blender, btw.
+  expect_equal(1L, 1L);
+})
+
+
+test_that("One can export and re-read surface meshes in PLY format", {
+  surface_file = system.file("extdata", "lh.tinysurface", package = "freesurferformats", mustWork = TRUE);
+  mesh = read.fs.surface(surface_file);
+
+  # Standford PLY format without vertex colors
+  ply_file = tempfile(fileext=".ply");
+  write.fs.surface.ply(ply_file, mesh$vertices, mesh$faces);
+
+  mesh_reread = read.fs.surface.ply(ply_file);
+  expect_equal(mesh$vertices, mesh_reread$vertices);
+  expect_equal(mesh$faces, mesh_reread$faces);
+
+  # PLY with vertex colors
+  vertex_colors = matrix(rep(82L, 5*4), ncol=4);    # the mesh contains 5 verts
+  ply_col_file = tempfile(fileext=".ply");
+  write.fs.surface.ply(ply_col_file, mesh$vertices, mesh$faces, vertex_colors=vertex_colors);
+
+  col_mesh_reread = read.fs.surface.ply(ply_col_file);
+  expect_equal(mesh$vertices, col_mesh_reread$vertices);
+  expect_equal(mesh$faces, col_mesh_reread$faces);
 })
 
