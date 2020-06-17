@@ -35,7 +35,7 @@ a.sourceLine { text-indent: -1em; padding-left: 1em; }
 pre.numberSource a.sourceLine
   { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
-  { content: attr(title);
+  { content: attr(data-line-number);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
     border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
@@ -309,27 +309,27 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="getting-access-to-the-header-data-in-mgh-or-mgz-files" class="section level2">
 <h2>Getting access to the header data in MGH or MGZ files</h2>
 <p>When reading a brain volume, make sure you explicitely request the full data, including the header:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>);</a>
-<a class="sourceLine" id="cb1-2" title="2">    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;brain.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
-<a class="sourceLine" id="cb1-3" title="3">    brain =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file, <span class="dt">with_header =</span> <span class="ot">TRUE</span>);</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>);</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">    mgh_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;brain.mgz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">    brain =<span class="st"> </span><span class="kw">read.fs.mgh</span>(mgh_file, <span class="dt">with_header =</span> <span class="ot">TRUE</span>);</a></code></pre></div>
 <p>This will give you an <code>fs.volume</code> instance, which is very handy. To see the header information, just type the variable name to print it:</p>
 <pre><code>brain
-Brain volume with 4 dimensions &#39;256x256x256x1&#39; and 16777216 voxels.
- - Data dimensions according to header: &#39;256x256x256x1&#39;.
- - Datatype according to header is 0 (&#39;MRI_UCHAR&#39;), values are in range [0.00, 156.00].
+Brain volume with 4 dimensions '256x256x256x1' and 16777216 voxels.
+ - Data dimensions according to header: '256x256x256x1'.
+ - Datatype according to header is 0 ('MRI_UCHAR'), values are in range [0.00, 156.00].
  - Header contains vox2ras transformation information. Voxel size is 1.00 x 1.00 x 1.00 mm.
- - Volume is conformed, pimary slice direction is &#39;coronal&#39;, orientation is &#39;LIA&#39;.
+ - Volume is conformed, pimary slice direction is 'coronal', orientation is 'LIA'.
  - Header contains MR acquisition parameters: TR: 2300.00 msec, TE: 2.01 msec, TI: 900.00 msec, flip angle: 9.00 degrees, fov = 256.000.</code></pre>
 <p>You can access the volume data in <code>brain$data</code> and the header in <code>brain$header</code> now.</p>
 </div>
 <div id="computing-more-information-from-the-header" class="section level2">
 <h2>Computing more information from the header</h2>
 <p>Not all MGH files contain a valid header that can be used to compute more information. To check your data, use the <code>mghheader.is.ras.valid</code> function:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">mghheader.is.ras.valid</span>(brain<span class="op">$</span>header);</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">mghheader.is.ras.valid</span>(brain<span class="op">$</span>header);</a></code></pre></div>
 <p>If the header is valid, it can be used to compute various transformation matrices. Here is an example that computes the <code>vox2ras</code> matrix and then uses it to get the <em>right, anterior, superior</em> (RAS) coordinates of the voxel at <em>column, row, slice</em> (CRS) index <code>(128, 128, 128)</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">voxel =<span class="st"> </span><span class="kw">c</span>(<span class="dv">128</span>, <span class="dv">128</span>, <span class="dv">128</span>);</a>
-<a class="sourceLine" id="cb4-2" title="2">vox2ras =<span class="st"> </span><span class="kw">mghheader.vox2ras</span>(brain);</a>
-<a class="sourceLine" id="cb4-3" title="3">ras_coords =<span class="st"> </span>vox2ras <span class="op">%*%</span><span class="st"> </span><span class="kw">c</span>(voxel, <span class="dv">1</span>);  <span class="co"># the 1 is because we use homogeneous coordinates</span></a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">voxel =<span class="st"> </span><span class="kw">c</span>(<span class="dv">128</span>, <span class="dv">128</span>, <span class="dv">128</span>);</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">vox2ras =<span class="st"> </span><span class="kw">mghheader.vox2ras</span>(brain);</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">ras_coords =<span class="st"> </span>vox2ras <span class="op">%*%</span><span class="st"> </span><span class="kw">c</span>(voxel, <span class="dv">1</span>);  <span class="co"># the 1 is because we use homogeneous coordinates</span></a></code></pre></div>
 <div id="transformation-matrices" class="section level3">
 <h3>Transformation matrices</h3>
 <p>You can use the following functions in the same way to compute various matrices:</p>
@@ -345,14 +345,14 @@ Brain volume with 4 dimensions &#39;256x256x256x1&#39; and 16777216 voxels.
 <div id="primary-slice-direction-and-volume-crs-orientation" class="section level3">
 <h3>Primary slice direction and volume CRS orientation</h3>
 <p>To get the primary slice direction:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">mghheader.primary.slice.direction</span>(brain);</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">mghheader.primary.slice.direction</span>(brain);</a></code></pre></div>
 <p>To get the orientation string for the 3 axes:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">mghheader.crs.orientation</span>(brain);</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">mghheader.crs.orientation</span>(brain);</a></code></pre></div>
 </div>
 <div id="check-whether-the-volume-is-conformed" class="section level3">
 <h3>Check whether the volume is conformed</h3>
 <p>To check whether the volume is conformed:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">mghheader.is.conformed</span>(brain);</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">mghheader.is.conformed</span>(brain);</a></code></pre></div>
 <p>A volume is considered <em>conformed</em> if it is in coronal primary slice direction, has CRS dimensions 256x256x256 and a voxel size of 1 mm in all 3 directions.</p>
 </div>
 </div>

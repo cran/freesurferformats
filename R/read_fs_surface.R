@@ -220,13 +220,13 @@ read.element.counts.ply.header <- function(ply_lines) {
 }
 
 
-#' @title Read file in FreeSurfer surface format
+#' @title Read file in FreeSurfer surface format or various mesh formats.
 #'
 #' @description Read a brain surface mesh consisting of vertex and face data from a file in FreeSurfer binary or ASCII surface format. For a subject (MRI image pre-processed with FreeSurfer) named 'bert', an example file would be 'bert/surf/lh.white'.
 #'
 #' @param filepath string. Full path to the input surface file. Note: gzipped files are supported and gz format is assumed if the filepath ends with ".gz".
 #'
-#' @param format one of 'auto', 'asc', 'vtk' or 'bin'. The format to assume. If set to 'auto' (the default), binary format will be used unless the filepath ends with '.asc'.
+#' @param format one of 'auto', 'asc', 'vtk', 'ply', 'gii', 'mz3', 'stl', 'byu', or 'bin'. The format to assume. If set to 'auto' (the default), binary format will be used unless the filepath ends with '.asc'.
 #'
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. This datastructure is known as a is a *face index set*. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
 #'
@@ -242,8 +242,8 @@ read.element.counts.ply.header <- function(ply_lines) {
 #' @export
 read.fs.surface <- function(filepath, format='auto') {
 
-  if(!(format %in% c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii'))) {
-    stop("Format must be one of c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii').");
+  if(!(format %in% c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii', 'mz3', 'stl', 'byu'))) {
+    stop("Format must be one of c('auto', 'bin', 'asc', 'vtk', 'ply', 'gii', 'mz3', 'stl', 'byu').");
   }
 
   if(format == 'asc' | (format == 'auto' & filepath.ends.with(filepath, c('.asc')))) {
@@ -260,6 +260,18 @@ read.fs.surface <- function(filepath, format='auto') {
 
   if(format == 'gii' | (format == 'auto' & filepath.ends.with(filepath, c('.gii')))) {
     return(read.fs.surface.gii(filepath));
+  }
+
+  if(format == 'mz3' | (format == 'auto' & filepath.ends.with(filepath, c('.mz3')))) {
+    return(read.fs.surface.mz3(filepath));
+  }
+
+  if(format == 'stl' | (format == 'auto' & filepath.ends.with(filepath, c('.stl')))) {
+    return(read.fs.surface.stl(filepath));
+  }
+
+  if(format == 'byu' | (format == 'auto' & filepath.ends.with(filepath, c('.byu')))) {
+    return(read.fs.surface.byu(filepath));
   }
 
   TRIS_MAGIC_FILE_TYPE_NUMBER = 16777214L;
@@ -381,16 +393,26 @@ read.fs.surface <- function(filepath, format='auto') {
 print.fs.surface <- function(x, ...) {
   cat(sprintf("Brain surface trimesh with %d vertices and %d faces.\n", nrow(x$vertices), nrow(x$faces)));
   cat(sprintf("-Surface coordinates: minimal values are (%.2f, %.2f, %.2f), maximal values are (%.2f, %.2f, %.2f).\n", min(x$vertices[,1]), min(x$vertices[,2]), min(x$vertices[,3]), max(x$vertices[,1]), max(x$vertices[,2]), max(x$vertices[,3])));
+  if(ncol(x$vertices) != 3L) {
+    warning(sprintf("Vertex coordinates of the mesh have %d dimensions, expected 3. Not a valid 3-dimensional mesh.\n", ncol(x$vertices)));
+  }
+  if(ncol(x$faces) != 3L) {
+    warning(sprintf("Faces of the mesh consist of %d vertices each, expected 3. Not a valid triangular mesh.\n", ncol(x$faces)));
+  }
 }
 
 
-#' Convert quad faces to tris faces.
+#' @title Convert quadrangular faces or polygons to triangular ones.
 #'
-#' @param quad_faces nx4 integer matrix, the indices of the vertices making up the *n* quad faces
+#' @param quad_faces nx4 integer matrix, the indices of the vertices making up the *n* quad faces.
 #'
-#' @return *2nx3* integer matrix, the indices of the vertices making up the *2n* tris faces
+#' @return *2nx3* integer matrix, the indices of the vertices making up the *2n* tris faces.
 #'
-#' @keywords internal
+#' @note This function does no fancy remeshing, it simply splits each quad into two triangles.
+#'
+#' @family mesh functions
+#'
+#' @export
 faces.quad.to.tris <- function(quad_faces) {
   num_quad_faces = nrow(quad_faces);
   num_tris_faces = num_quad_faces * 2L;
@@ -452,6 +474,7 @@ is.fs.surface <- function(x) inherits(x, "fs.surface")
 #' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
 #'
 #' @family mesh functions
+#' @family gifti readers
 #'
 #' @export
 read.fs.surface.gii <- function(filepath) {
@@ -463,4 +486,532 @@ read.fs.surface.gii <- function(filepath) {
   } else {
     stop("Reading GIFTI format surface files requires the package 'gifti' to be installed.");
   }
+}
+
+
+#' @title Read surface mesh in mz3 format, used by Surf-Ice.
+#'
+#' @description The mz3 format is a binary file format that can store a mesh (vertices and faces), and optionally per-vertex colors or scalars.
+#'
+#' @param filepath full path to surface mesh file in mz3 format.
+#'
+#' @return an `fs.surface` instance. If the mz3 file contained RGBA per-vertex colors or scalar per-vertex data, these are available in the 'metadata' property.
+#'
+#' @references See \url{https://github.com/neurolabusc/surf-ice} for details on the format.
+#'
+#' @export
+read.fs.surface.mz3 <- function(filepath) {
+  is_gzipped = FALSE;
+  fh = file(filepath, "rb");
+  magic = readBin(fh, integer(), size = 2, n = 1, endian = "little");
+  if(magic != 23117L) {
+    close(fh);
+    fh = gzfile(filepath, "rb");
+    magic = readBin(fh, integer(), size = 2, n = 1, endian = "little");
+    if(magic != 23117L) {
+      close(fh);
+      stop("File not in mz3 format");
+    }
+    is_gzipped = TRUE;
+  }
+  attr = readBin(fh, integer(), size = 2, n = 1, endian = "little");
+  num_faces = magic = readBin(fh, integer(), size = 4, n = 1, endian = "little");
+  num_vertices = readBin(fh, integer(), size = 4, n = 1, endian = "little");
+  num_skip = readBin(fh, integer(), size = 4, n = 1, endian = "little");
+
+  # cat(sprintf("mz3: magic=%d attr=%d faces=%d vertices=%d skip=%d. is_gz=%d\n", magic, attr, num_faces, num_vertices, num_skip, as.integer(is_gzipped)));
+
+  is_face = bitwAnd(attr, 1L) != 0L;
+  is_vert = bitwAnd(attr, 2L) != 0L;
+  is_rgba = bitwAnd(attr, 4L) != 0L;
+  is_scalar = bitwAnd(attr, 8L) != 0L;
+
+  # cat(sprintf("mz3: face=%d vert=%d rgba=%d scalar=%d.\n", as.integer(is_face), as.integer(is_vert), as.integer(is_rgba), as.integer(is_scalar)));
+
+  if(attr > 15L) {
+    stop("Unsupported mz3 file version.");
+  }
+
+  if(num_vertices < 1L) {
+    stop("Mesh must contain at least one vertex.");
+  }
+  if(is_face) {
+    if(num_faces < 1L) {
+      stop("Must contain at least one face is faces is set.");
+    }
+  }
+
+  header_bytes = 16L; # these have already been read above.
+
+  if(num_skip > 0L) {
+    if(is_gzipped) {   # Cannot seek in a gzip stream
+      discarded = readBin(fh, integer(), n = num_skip, size = 1L);
+    } else {
+        seek(fh, where=num_skip, origin="current");
+    }
+  }
+
+  if(is_face) {
+    faces_vertex_indices = readBin(fh, integer(), size = 4, n = num_faces * 3L, endian = "little");
+    faces = matrix(faces_vertex_indices, nrow=num_faces, ncol=3L, byrow = TRUE);
+    faces = faces + 1L;
+  }
+  if(is_vert) {
+    vertex_coords = readBin(fh, numeric(), size = 4, n = num_vertices * 3L, endian = "little");
+    vertices = matrix(vertex_coords, nrow=num_vertices, ncol=3L, byrow = TRUE);
+  }
+  vertex_colors = NULL;
+  if(is_rgba) {
+    vertex_colors = readBin(fh, integer(), size = 4, n = num_vertices, endian = "little");
+  }
+  scalars = NULL;
+  if(is_scalar) {
+    scalars = readBin(fh, numeric(), size = 4, n = num_vertices, endian = "little");
+  }
+
+  ret_list = list();
+  ret_list$vertices = vertices;
+  ret_list$faces = faces;
+  ret_list$metadata = list("vertex_colors"=vertex_colors, "scalars"=scalars);
+  class(ret_list) = c("fs.surface", class(ret_list));
+
+  close(fh);
+  return(ret_list);
+}
+
+
+#' @title Read surface mesh in STL binary format.
+#'
+#' @description The STL format is a mesh format that is often used for 3D printing, it stores geometry information. It is known as stereolithography format. A binary and an ASCII version exist. This function reads the binary version.
+#'
+#' @inheritParams read.fs.surface.stl.ascii
+#'
+#' @return an `fs.surface` instance.
+#'
+#' @references \url{https://en.wikipedia.org/wiki/STL_(file_format)}
+#'
+#' @note The STL format does not use indices into a vertex list to define faces, instead it repeats vertex coords in each face ('polygon soup').
+#'
+#' @export
+read.fs.surface.stl.bin <- function(filepath, digits = 6L) {
+  fh = file(filepath, "rb");
+  on.exit({ close(fh) }, add=TRUE);
+
+  # skip header
+  discarded = readBin(fh, integer(), n = 80L, size = 1L);
+
+  num_faces = readBin(fh, integer(), size = 4, n = 1, endian = "little");
+
+  # cat(sprintf("Reading %d faces from binary STL file.\n", num_faces));
+
+  all_normals = NULL;
+  all_vertex_coords = NULL;
+  all_attr_counts = NULL;
+
+  for(face_idx in seq.int(num_faces)) {
+    face_normal = readBin(fh, double(), size = 4, n = 3L, endian = "little");
+    vertex_coords = readBin(fh, double(), size = 4, n = 9L, endian = "little");
+    vertex_coords = matrix(vertex_coords, nrow = 3, byrow = TRUE);
+    attr_count = readBin(fh, integer(), size = 2, n = 1L, signed = FALSE, endian = "little");
+    all_attr_counts = c(all_attr_counts, attr_count);
+
+    if(is.null(all_normals)) {
+      all_normals = face_normal;
+    } else {
+      all_normals = rbind(all_normals, face_normal);
+    }
+    if(is.null(all_vertex_coords)) {
+      all_vertex_coords = vertex_coords;
+    } else {
+      all_vertex_coords = rbind(all_vertex_coords, vertex_coords);
+    }
+  }
+
+  if(any(all_attr_counts != 0L)) {
+    warning('Found non-zero face attribute count entries in file, ignored.');
+  }
+
+  return(polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits));
+}
+
+
+#' @title Read mesh in STL format, auto-detecting ASCII versus binary format version.
+#'
+#' @inheritParams read.fs.surface.stl.ascii
+#'
+#' @return an `fs.surface` instance, the mesh.
+#'
+#' @note The mesh is stored in the file as a polygon soup, which is transformed into an index mesh by this function.
+#'
+#' @export
+read.fs.surface.stl <- function(filepath, digits = 6L) {
+  if(stl.format.file.is.ascii(filepath)) {
+    return(read.fs.surface.stl.ascii(filepath, digits = digits));
+  } else {
+    return(read.fs.surface.stl.bin(filepath, digits = digits));
+  }
+}
+
+
+#' @title Guess whether a mesh file in STL format is the ASCII or the binary version.
+#'
+#' @inheritParams read.fs.surface.stl.bin
+#'
+#' @keywords internal
+stl.format.file.is.ascii <- function(filepath) {
+  stl_lines = NULL;
+  stl_lines <- tryCatch({
+    readLines(filepath);
+  }, error = function(e) {
+    NULL;
+  }, warning = function(e) {
+    NULL;
+  });
+
+  if(is.null(stl_lines)) {
+    return(FALSE);
+  }
+  return(startsWith(stl_lines[1], "solid"));
+}
+
+
+#' @title Read surface mesh in STL ASCII format.
+#'
+#' @description The STL format is a mesh format that is often used for 3D printing, it stores geometry information. It is known as stereolithography format. A binary and an ASCII version exist. This function reads the ASCII version.
+#'
+#' @param filepath full path to surface mesh file in STL format.
+#'
+#' @param digits the precision (number of digits after decimal separator) to use when determining whether two x,y,z coords define the same vertex. This is used when the polygon soup is turned into an indexed mesh.
+#'
+#' @return an `fs.surface` instance. The normals are available in the 'metadata' property.
+#'
+#' @references \url{https://en.wikipedia.org/wiki/STL_(file_format)}
+#'
+#' @note The STL format does not use indices into a vertex list to define faces, instead it repeats vertex coords in each face ('polygon soup'). Therefore, the mesh needs to be reconstructed, which requires the `misc3d` package.
+#'
+#' @keywords internal
+read.fs.surface.stl.ascii <- function(filepath, digits = 6L) {
+
+  stl_lines = readLines(filepath);
+  lines_total = length(stl_lines);
+  if(lines_total < 8L) {
+    stop("Invalid STL ASCII file: file must contain at least 8 lines (one face).");
+  }
+
+  if(! startsWith(stl_lines[1], "solid")) {
+    stop("Invalid STL ASCII file: first line must start with 'solid'.");
+  }
+
+  line_idx = 1L;
+  num_lines_left = lines_total - line_idx;
+
+  all_normals = NULL;
+  all_vertex_coords = NULL;
+
+  while(num_lines_left >= 7L) {
+    face_info = parse.stl.ascii.face(stl_lines[(line_idx+1L):(line_idx+7L)]);
+    face_normal = face_info$face_normal;
+    vertex_coords = face_info$vertex_coords;
+
+    if(is.null(all_normals)) {
+      all_normals = face_normal;
+    } else {
+      all_normals = rbind(all_normals, face_normal);
+    }
+    if(is.null(all_vertex_coords)) {
+      all_vertex_coords = vertex_coords;
+    } else {
+      all_vertex_coords = rbind(all_vertex_coords, vertex_coords);
+    }
+
+    line_idx = line_idx + 7L;
+    num_lines_left = lines_total - line_idx;
+  }
+
+  if(num_lines_left != 1L) {
+    stop("Ignored %d lines at the end of ASCII STL file, please double-check file.\n", num_lines_left);
+  } else {
+    if(! startsWith(stl_lines[lines_total], "endsolid")) {
+      stop("Invalid STL ASCII file: last line must start with 'endsolid'.");
+    }
+  }
+
+  return(polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits));
+}
+
+
+#' @title Parse a single ASCII STL face.
+#'
+#' @param stl_face_lines vector of exactly 7 character strings, the lines from an STL ASCII file defining a triangular face.
+#'
+#' @return named list with entries: 'face_normal': double matrix with 1 row and 3 columns, the face normal. 'vertex_coords': double matrix with 3 rows and 3 columns, the 3x3 vertex coordinates of the face, each row contain the x, y, and z coordinate of a vertex.
+#'
+#' @keywords internal
+parse.stl.ascii.face <- function(stl_face_lines) {
+  if(length(stl_face_lines) != 7L) {
+    stop(sprintf("Expected 7 STL lines, received %d.\n", length(stl_face_lines)));
+  }
+  stl_face_lines = trimws(stl_face_lines); # trim leading and trailing white space from all lines.
+
+  # the normal line is the fist of the 7 lines, and looks like this: 'facet normal 8.424343831663975e-20 6.016192594284479e-15 -1.0'
+  face_normal = as.double(strsplit(stl_face_lines[1], " ")[[1]][3:5]);
+  face_normal = matrix(face_normal, ncol = 3, nrow = 1);
+
+  # the 3 vertex lines are lines 3 to 5 of the  lines, each one looks like this: 'vertex -19.848729961302116 -22.57002825204731 38.1169729018115'
+  v1_coords = as.double(strsplit(stl_face_lines[3], " ")[[1]][2:4]);
+  v2_coords = as.double(strsplit(stl_face_lines[4], " ")[[1]][2:4]);
+  v3_coords = as.double(strsplit(stl_face_lines[5], " ")[[1]][2:4]);
+
+  vertex_coords = rbind(v1_coords, v2_coords, v3_coords);
+  colnames(vertex_coords) = c('x', 'y', 'z');
+  rownames(vertex_coords) = NULL;
+
+  return(list('face_normal'=face_normal, 'vertex_coords'=vertex_coords));
+}
+
+
+#' @title Turn polygon soup into indexed mesh.
+#'
+#' @description Some mesh file formats like STL do not store the faces as indices into a vertex list ('indexed mesh'), but repeat all vertex coordinates for each face ('polygon soup'). This function creates an indexed mesh from a polysoup.
+#'
+#' @param face_vertex_coords numerical matrix with *n* rows and 3 columns, the vertex coordinates of the faces. Each row contains the x,y,z coordinates of a single vertex, and three consecutive vertex rows form a triangular face.
+#'
+#' @param digits the precision (number of digits after decimal separator) to use when to determine whether two x,y,z coords define the same vertex.
+#'
+#' @return an indexed mesh, as an `fs.surface` instance (see \code{\link[freesurferformats]{read.fs.surface}}).
+#'
+#' @keywords internal
+polygon.soup.to.indexed.mesh <- function(faces_vertex_coords, digits=6) {
+
+  if(! is.matrix(faces_vertex_coords)) {
+    stop("Parameter 'faces_vertex_coords' must be a matrix.");
+  }
+  if(ncol(faces_vertex_coords) != 3L) {
+    stop(sprintf("Parameter 'faces_vertex_coords' must be a matrix with exactly 3 columns, found %d.\n", ncol(faces_vertex_coords)));
+  }
+
+  if((nrow(faces_vertex_coords) %% 3L) != 0L) {
+    stop(sprintf("Parameter 'faces_vertex_coords' must be a matrix with row count a multiple of 3, but found %d rows.\n", nrow(faces_vertex_coords)));
+  }
+  num_initial_faces = as.integer(nrow(faces_vertex_coords) / 3L);
+  num_initial_vertices = nrow(faces_vertex_coords);
+
+  # rounded version of coords for comparison.
+  faces_vertex_coords_rounded = round(faces_vertex_coords, digits = digits);
+  coord_keys = apply(faces_vertex_coords, 1, coord.to.key, digits = digits);
+  new_vertex_indices = rep(0L, num_initial_vertices);
+  new_vertex_old_indices = rep(NA, num_initial_vertices); # reverse mapping. The length is unknown, but it cannot be more than the old ones.
+  new_vertex_coords = NULL;
+
+  unique_position_keys_to_index = list();
+  current_unique_vertex_index = 1L;
+  for(vert_idx_initial in seq.int(num_initial_vertices)) {
+    vkey = coord_keys[vert_idx_initial];
+    vcoords = faces_vertex_coords[vert_idx_initial,];
+    if(is.null(unique_position_keys_to_index[[vkey]])) {
+      unique_position_keys_to_index[[vkey]] = current_unique_vertex_index;
+      new_vertex_indices[vert_idx_initial] = current_unique_vertex_index;
+
+      # store coord for new vertex
+      new_vertex_old_indices[current_unique_vertex_index] = vert_idx_initial;
+      if(is.null(new_vertex_coords)) {
+        new_vertex_coords = matrix(vcoords, ncol=3);
+      } else {
+        new_vertex_coords = rbind(new_vertex_coords, vcoords);
+      }
+
+      current_unique_vertex_index = current_unique_vertex_index + 1L;
+    } else {
+      new_vertex_indices[vert_idx_initial] = unique_position_keys_to_index[[vkey]];
+    }
+  }
+
+  # build faces using vertex indices
+  new_faces = matrix(new_vertex_indices, ncol = 3, byrow = TRUE);
+
+  mesh = list('vertices'=new_vertex_coords, 'faces'=new_faces);
+  class(mesh) = c(class(mesh), 'fs.surface');
+  return(mesh);
+}
+
+
+#' @title Turn coordinate vector into string.
+#'
+#' @param coord double vector of length 3, the xyz coord
+#'
+#' @param digits integer, the number of digits (after the decimal separator) to use
+#'
+#' @return character string
+#'
+#' @keywords internal
+coord.to.key <- function(coord, digits=6L) {
+  format_string = sprintf("%%.%df,%%.%df,%%.%df", digits, digits, digits);
+  return(sprintf(format_string, coord[1], coord[2], coord[3]));
+}
+
+
+#' @title Read mesh in BYU format.
+#'
+#' @description The BYU or Brigham Young University format is an old ASCII mesh format that is based on fixed character positions in lines (as opposed to whitespace-separated elements). I consider it a bit counter-intuitive.
+#'
+#' @param filepath full path of the file in BYU format.
+#'
+#' @param part positive integer, the index of the mesh that should be loaded from the file. Only relevant if the file contains more than one mesh.
+#'
+#' @return an `fs.surface` instance, aka a mesh
+#'
+#' @references \url{http://www.eg-models.de/formats/Format_Byu.html}
+#'
+#' @importFrom stats na.omit
+#' @export
+read.fs.surface.byu <- function(filepath, part = 1L) {
+  part = as.integer(part);
+  byu_lines = readLines(filepath);
+
+  element_counts = as.integer(linesplit.fixed(byu_lines[1], length_per_part=6L, num_parts_expected=5L, error_tag = "1"));
+  num_parts = element_counts[1]; # number of meshes in the file.
+  num_vertices = element_counts[2];
+  num_faces = element_counts[3]; # strictly these faces are polys, not neccessarily triangles. We only support triangles though.
+  num_connects = element_counts[4];
+  num_test = element_counts[5];
+
+  if(num_test != 0L) {
+    stop(sprintf("Not a valid BYU mesh file: num_test must be 0, but is '%d'.\n", num_test));
+  }
+
+  vertices_per_face = 3L; # assume triangular mesh
+  if(num_connects != (3L * num_faces)) {
+    vertices_per_face = num_connects / num_faces;
+    if(vertices_per_face == 4L) {
+      message(sprintf("Mesh has %d vertices per face (quadrangular faces), remeshing to triangular faces.\n", vertices_per_face));
+    } else {
+      stop(sprintf("Only triangular or quadrangular meshes in BYU files are supported: expected %d edges for %d triangular faces, but found %d. Mesh has %d vertices per face.\n", (3L * num_faces), num_faces, num_connects, vertices_per_face));
+    }
+  }
+  if(part > num_parts) {
+    stop(sprintf("Requested to load mesh # %d from BYU file, but the file contains %d meshes only.\n", part, num_parts));
+  }
+  if(num_vertices < vertices_per_face | num_faces < 1L) {
+    stop("Mesh file does not contain any faces.");
+  }
+  relevant_part_info_line_index = part + 1L;
+  part_info = as.integer(linesplit.fixed(byu_lines[relevant_part_info_line_index], length_per_part=6L, num_parts_expected=2L, error_tag = relevant_part_info_line_index));
+  part_start = part_info[1];  # the first vertex index (by one-based index in the face list) of this mesh
+  part_end = part_info[2];    # the last vertex index (by one-based index in the face list) of this mesh
+
+  # Read the point lines. Each line contains the x, y, z coords for 2 vertices (=2 x 3 numbers), the last line may of
+  # course only contain the coords for a single vertex.
+  all_coords = NULL;
+  first_vertex_coords_line_index = 1L + num_parts + 1L;
+  num_verts_left_to_parse = num_vertices;
+  current_line_idx = first_vertex_coords_line_index;
+  chars_per_coord = 12L;
+  while(num_verts_left_to_parse > 0L) {
+    cline = byu_lines[current_line_idx];
+    coords = as.double(linesplit.fixed(cline, length_per_part=chars_per_coord, num_parts_expected=NULL, error_tag = current_line_idx));
+    coords = stats::na.omit(coords); # If a line (the last one) is not fully filled with digits, the missing ones will be parsed as NA. Remove these NAs.
+    if(length(coords) == 6L) {
+      num_verts_left_to_parse = num_verts_left_to_parse - 2L;
+    } else if(length(coords) == 3L) {
+      num_verts_left_to_parse = num_verts_left_to_parse - 1L;
+    } else {
+      stop(sprintf("Expected 3 or 6 vertex coordinates per BYU file line, but found %d in line # %d. Mesh not 3-dimensional?\n", length(coords), current_line_idx));
+    }
+    coords = matrix(coords, ncol = 3L, byrow = TRUE);
+    if(is.null(all_coords)) {
+      all_coords = coords;
+    } else {
+      all_coords = rbind(all_coords, coords);
+    }
+    current_line_idx = current_line_idx + 1L;
+  }
+
+  if(nrow(all_coords) != num_vertices) {
+    stop(sprintf("BYU data mismatch: expected %d vertices from header, but found %d.\n", num_vertices, nrow(all_coords)));
+  }
+
+  # Parse faces. For now, we only parse the vertex indices. We construct faces from them later.
+  all_faces_vert_indices = NULL; # only a vector for now, not a matrix.
+  num_faces_left_to_parse = num_faces;
+  num_faces_vert_indices_left_to_parse = num_faces * vertices_per_face;
+  chars_per_vertex_index = 6L;
+  while(num_faces_vert_indices_left_to_parse > 0L) {
+    cline = byu_lines[current_line_idx];
+    faces_vert_indices = as.integer(linesplit.fixed(cline, length_per_part=chars_per_vertex_index, num_parts_expected=NULL, error_tag = current_line_idx));
+    faces_vert_indices = stats::na.omit(faces_vert_indices);
+
+    num_faces_vert_indices_left_to_parse = num_faces_vert_indices_left_to_parse - length(faces_vert_indices);
+    if(is.null(all_faces_vert_indices)) {
+      all_faces_vert_indices = faces_vert_indices;
+    } else {
+      all_faces_vert_indices = c(all_faces_vert_indices, faces_vert_indices);
+    }
+    current_line_idx = current_line_idx + 1L;
+  }
+
+  # Now create faces from the vector of vertex indices. If an index is negative, it is the last one in the current face.
+  last_vertex_of_face_indices = which(all_faces_vert_indices < 0L);
+  if(length(last_vertex_of_face_indices) != num_faces) {
+    stop(sprintf("BYU data mismatch: expected %d face end vertices from header, but found %d.\n", num_faces, length(last_vertex_of_face_indices)));
+  }
+
+  all_faces_vert_indices = as.integer(abs(all_faces_vert_indices));
+  faces = matrix(all_faces_vert_indices, ncol = vertices_per_face, byrow = TRUE);
+
+  mesh = list('vertices'=all_coords, 'faces'=faces);
+
+  # Remesh quadrangular mesh to triangular if needed.
+  if(vertices_per_face == 4L) {
+    mesh$metadata = list('faces_quads'=faces);
+    mesh$faces = faces.quad.to.tris(mesh$faces);
+  }
+
+  class(mesh) = c(class(mesh), 'fs.surface');
+  return(mesh);
+}
+
+
+#' @title Split a string into fixed-length parts.
+#'
+#' @param cline character string, the input line
+#'
+#' @param length_per_part integer, number of characters per part
+#'
+#' @param num_parts_expected integer, the number of parts. Leave at NULL if this is not known.
+#'
+#' @param error_tag optional character string, how to identify the line in a parsing error message. Could be the line number, or whatever. Only relevant if 'num_parts_expected' is not matched.
+#'
+#' @keywords internal
+linesplit.fixed <- function(cline, length_per_part, num_parts_expected=NULL, error_tag=NULL) {
+
+  if(is.null(error_tag)) {
+    error_tag_string = "";
+  } else {
+    error_tag_string = sprintf('%s ', as.character(error_tag));
+  }
+
+  if((nchar(cline) %% length_per_part) != 0L) {
+    stop(sprintf("Line %slength %d is not a multiple of the length per part (%d).\n", error_tag_string, nchar(cline), length_per_part));
+  }
+
+  if(! is.null(num_parts_expected)) {
+    num_chars_expected = num_parts_expected * length_per_part;
+    if(nchar(cline) != num_chars_expected) {
+      stop(sprintf("Line %slength of %d characters expected for %d parts with length %d, but found line with %d chars.\n", error_tag_string, num_chars_expected, num_parts_expected, length_per_part, nchar(cline)));
+    }
+  }
+  start_indices = seq(1L, nchar(cline)-1L, by=length_per_part);
+  stop_indices = seq(length_per_part, nchar(cline), by=length_per_part);
+
+  if(length(start_indices) != length(stop_indices)) {
+    stop(sprintf("Line %slength %d is not a multiple of the length per part (%d) -- part index mistmatch.\n", error_tag_string, nchar(cline), length_per_part));
+  }
+
+  line_parts = substring(cline, start_indices, stop_indices);
+  if(! is.null(num_parts_expected)) {
+    if(length(line_parts) != num_parts_expected) {
+      stop(sprintf("Parsed line %scontains %d fields, expected %d.", error_tag_string, length(line_parts), num_parts_expected));
+    }
+  }
+  return(line_parts);
 }

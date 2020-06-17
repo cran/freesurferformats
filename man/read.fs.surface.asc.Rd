@@ -20,6 +20,7 @@ This is also known as *srf* format.
 }
 \seealso{
 Other mesh functions: 
+\code{\link{faces.quad.to.tris}()},
 \code{\link{read.fs.surface.gii}()},
 \code{\link{read.fs.surface.ply}()},
 \code{\link{read.fs.surface.vtk}()},
@@ -27,7 +28,9 @@ Other mesh functions:
 \code{\link{read_nisurfacefile}()},
 \code{\link{read_nisurface}()},
 \code{\link{write.fs.surface.asc}()},
+\code{\link{write.fs.surface.byu}()},
 \code{\link{write.fs.surface.gii}()},
+\code{\link{write.fs.surface.mz3}()},
 \code{\link{write.fs.surface.vtk}()},
 \code{\link{write.fs.surface}()}
 }

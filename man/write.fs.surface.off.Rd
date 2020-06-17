@@ -7,7 +7,7 @@
 write.fs.surface.off(filepath, vertex_coords, faces)
 }
 \arguments{
-\item{filepath}{string. Full path to the output surface file, should end with '.vtk', but that is not enforced.}
+\item{filepath}{string. Full path to the output surface file, should end with '.off', but that is not enforced.}
 
 \item{vertex_coords}{n x 3 matrix of doubles. Each row defined the x,y,z coords for a vertex.}
 
@@ -37,6 +37,8 @@ Do not confuse the OFF format (.off) with the Wavefront object file format (.obj
 \seealso{
 Other mesh export functions: 
 \code{\link{write.fs.surface.obj}()},
+\code{\link{write.fs.surface.off.ply2}()},
+\code{\link{write.fs.surface.ply2}()},
 \code{\link{write.fs.surface.ply}()},
 \code{\link{write.fs.surface}()}
 }

@@ -9,7 +9,7 @@ write.fs.curv(filepath, data)
 \arguments{
 \item{filepath, }{string. Full path to the output curv file. If it ends with ".gz", the file is written in gzipped format. Note that this is not common, and that other software may not handle this transparently.}
 
-\item{data}{vector of floats. The brain morphometry data to write, one value per vertex.}
+\item{data}{vector of doubles. The brain morphometry data to write, one value per vertex.}
 }
 \description{
 Write vertex-wise brain surface data to a file in FreeSurfer binary 'curv' format.
@@ -25,7 +25,9 @@ Other morphometry functions:
 \code{\link{read.fs.morph}()},
 \code{\link{read.fs.volume}()},
 \code{\link{read.fs.weight}()},
+\code{\link{write.fs.label.gii}()},
 \code{\link{write.fs.mgh}()},
+\code{\link{write.fs.morph.gii}()},
 \code{\link{write.fs.morph}()},
 \code{\link{write.fs.weight}()}
 }

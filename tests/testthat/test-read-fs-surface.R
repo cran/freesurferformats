@@ -3,8 +3,8 @@
 test_that("Our demo surface file can be read using read.fs.surface", {
 
   skip_if(tests_running_on_cran_under_macos(), message = "Skipping on CRAN under MacOS, required test data cannot be downloaded.");
-  freesurferformats::download_optional_data();
-  subjects_dir = freesurferformats::get_optional_data_filepath("subjects_dir");
+  freesurferformats::download_opt_data();
+  subjects_dir = freesurferformats::get_opt_data_filepath("subjects_dir");
   surface_file = file.path(subjects_dir, "subject1", "surf", "lh.white");
   skip_if_not(file.exists(surface_file), message="Test data missing.") ;
 
@@ -36,8 +36,8 @@ test_that("Vertex connectivity in the demo surface file is as expected from refe
 
   skip_if(tests_running_on_cran_under_macos(), message = "Skipping on CRAN under MacOS, required test data cannot be downloaded.");
 
-  freesurferformats::download_optional_data();
-  subjects_dir = freesurferformats::get_optional_data_filepath("subjects_dir");
+  freesurferformats::download_opt_data();
+  subjects_dir = freesurferformats::get_opt_data_filepath("subjects_dir");
   surface_file = file.path(subjects_dir, "subject1", "surf", "lh.white");
   skip_if_not(file.exists(surface_file), message="Test data missing.");
 
@@ -60,8 +60,8 @@ test_that("The vertices of a face are close to each other", {
 
   skip_if(tests_running_on_cran_under_macos(), message = "Skipping on CRAN under MacOS, required test data cannot be downloaded.");
 
-  freesurferformats::download_optional_data();
-  subjects_dir = freesurferformats::get_optional_data_filepath("subjects_dir");
+  freesurferformats::download_opt_data();
+  subjects_dir = freesurferformats::get_opt_data_filepath("subjects_dir");
   surface_file = file.path(subjects_dir, "subject1", "surf", "lh.white");
   skip_if_not(file.exists(surface_file), message="Test data missing.");
 
@@ -144,3 +144,42 @@ test_that("A surface file in FreeSurfer ASCII format can be read using read.fs.s
   num_faces_with_index_zero = sum(surf$faces==0);
   expect_equal(num_faces_with_index_zero, 0);
 })
+
+
+test_that("A surface file in STL binary format can be read using read.fs.surface", {
+  stlbin_surface_file = system.file("extdata", "cube_bin.stl", package = "freesurferformats", mustWork = TRUE);
+  surf = read.fs.surface(stlbin_surface_file);
+
+  known_vertex_count = 8L;
+  known_face_count = 12L;
+
+  expect_equal(nrow(surf$vertices), known_vertex_count);
+  expect_equal(ncol(surf$vertices), 3);      # the 3 coords (x,y,z)
+  expect_equal(typeof(surf$vertices), "double");
+
+  expect_equal(nrow(surf$faces), known_face_count);
+  expect_equal(ncol(surf$faces), 3);      # the 3 vertex indices
+})
+
+
+test_that("A surface file in BYU ASCII mesh format can be read using read.fs.surface", {
+  byu_surface_file = system.file("extdata", "cube_quads.byu", package = "freesurferformats", mustWork = TRUE);
+  surf = read.fs.surface(byu_surface_file);
+
+  known_vertex_count = 8L;
+  known_face_count = 12L;
+
+  expect_equal(nrow(surf$vertices), known_vertex_count);
+  expect_equal(ncol(surf$vertices), 3);      # the 3 coords (x,y,z)
+  expect_equal(typeof(surf$vertices), "double");
+
+  expect_equal(nrow(surf$faces), known_face_count);
+  expect_equal(ncol(surf$faces), 3);      # the 3 vertex indices of a triangle
+
+  # The file actually contains quadrangular polygons, not triangles. The function
+  # remeshes automatically, but we can access the original quads as well:
+  expect_equal(ncol(surf$metadata$faces_quads), 4);      # the 4 vertex indices of a quad
+  expect_equal(nrow(surf$metadata$faces_quads), known_face_count / 2L);
+})
+
+

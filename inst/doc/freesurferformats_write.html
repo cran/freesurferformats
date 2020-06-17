@@ -35,7 +35,7 @@ a.sourceLine { text-indent: -1em; padding-left: 1em; }
 pre.numberSource a.sourceLine
   { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
-  { content: attr(title);
+  { content: attr(data-line-number);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
     border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
@@ -309,14 +309,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>Morphometry data, or <em>vertex-wise measures</em>, are data that usually describe a measure like cortical thickness or surface area over the cortex. There is one scalar value per vertex of the brain surface mesh. Of course, you could write whatever you want (p-values, effect sizes at the vertex, …), as long as the data is scalar.</p>
 <p>The package provides the <code>write.fs.morph</code> function to write any scalar data that does not require metadata like MR acquisition parameters or transforms. With this function, the format gets determined automatically from the file name. In the following example, we load the area and thickness values for a subject and write the product of area and thickness (which is <em>not</em> cortical volume, by the way) to new files in MGH, MGZ and curv format.</p>
 <p>Let’s first load the data:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>);</a>
-<a class="sourceLine" id="cb1-2" title="2">    area =<span class="st"> </span><span class="kw">read.fs.morph</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>));</a>
-<a class="sourceLine" id="cb1-3" title="3">    thickness =<span class="st"> </span><span class="kw">read.fs.morph</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.area.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>));</a>
-<a class="sourceLine" id="cb1-4" title="4">    mymorphdata =<span class="st"> </span>area <span class="op">*</span><span class="st"> </span>thickness;</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">    <span class="kw">library</span>(<span class="st">&quot;freesurferformats&quot;</span>);</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">    area =<span class="st"> </span><span class="kw">read.fs.morph</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.thickness&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>));</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">    thickness =<span class="st"> </span><span class="kw">read.fs.morph</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.area.gz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>));</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">    mymorphdata =<span class="st"> </span>area <span class="op">*</span><span class="st"> </span>thickness;</a></code></pre></div>
 <p>Now we could write our derived data like this:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">    format1 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;mgz&quot;</span>), mymorphdata);</a>
-<a class="sourceLine" id="cb2-2" title="2">    format2 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;mgh&quot;</span>), mymorphdata);</a>
-<a class="sourceLine" id="cb2-3" title="3">    format3 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;curv&quot;</span>), mymorphdata);</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">    format1 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;mgz&quot;</span>), mymorphdata);</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">    format2 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;mgh&quot;</span>), mymorphdata);</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">    format3 =<span class="st"> </span><span class="kw">write.fs.morph</span>(<span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;curv&quot;</span>), mymorphdata);</a></code></pre></div>
 </div>
 <div id="writing-mgh-and-mgz-format-files-with-full-control-over-the-header" class="section level2">
 <h2>Writing MGH and MGZ format files with full control over the header</h2>
@@ -332,11 +332,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul></li>
 </ul>
 <p>Here is an example that writes a file in MGH format including custom header data:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">    mgh_outfile =<span class="st"> &quot;mystudy/subject1/mri/shifted_brain.mgz&quot;</span></a>
-<a class="sourceLine" id="cb3-2" title="2">    data =<span class="st"> </span><span class="kw">array</span>(<span class="dt">data=</span><span class="kw">rep</span>(1L, <span class="dv">256</span><span class="op">*</span><span class="dv">256</span><span class="op">*</span><span class="dv">256</span>), <span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">256</span>,<span class="dv">256</span>,<span class="dv">256</span>)); <span class="co"># not exactly a brain, but will do.</span></a>
-<a class="sourceLine" id="cb3-3" title="3">    mr_params =<span class="st"> </span><span class="kw">c</span>(<span class="dv">2300</span>, <span class="fl">0.1</span>, <span class="fl">2.</span>, <span class="fl">900.</span>)</a>
-<a class="sourceLine" id="cb3-4" title="4">    vox2ras_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,  <span class="dv">0</span>,<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>,  <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,  <span class="fl">127.5</span>,<span class="op">-</span><span class="fl">98.6273</span>,<span class="fl">79.0953</span>,<span class="fl">1.000</span>), <span class="dt">nrow=</span><span class="dv">4</span>, <span class="dt">byrow =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb3-5" title="5">    <span class="kw">write.fs.mgh</span>(mgh_outfile, data, <span class="dt">vox2ras_matrix=</span>vox2ras_matrix, <span class="dt">mr_params=</span>mr_params);</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">    mgh_outfile =<span class="st"> &quot;mystudy/subject1/mri/shifted_brain.mgz&quot;</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">    data =<span class="st"> </span><span class="kw">array</span>(<span class="dt">data=</span><span class="kw">rep</span>(1L, <span class="dv">256</span><span class="op">*</span><span class="dv">256</span><span class="op">*</span><span class="dv">256</span>), <span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">256</span>,<span class="dv">256</span>,<span class="dv">256</span>)); <span class="co"># not exactly a brain, but will do.</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">    mr_params =<span class="st"> </span><span class="kw">c</span>(<span class="dv">2300</span>, <span class="fl">0.1</span>, <span class="fl">2.</span>, <span class="fl">900.</span>)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">    vox2ras_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,  <span class="dv">0</span>,<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>,  <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,  <span class="fl">127.5</span>,<span class="op">-</span><span class="fl">98.6273</span>,<span class="fl">79.0953</span>,<span class="fl">1.000</span>), <span class="dt">nrow=</span><span class="dv">4</span>, <span class="dt">byrow =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">    <span class="kw">write.fs.mgh</span>(mgh_outfile, data, <span class="dt">vox2ras_matrix=</span>vox2ras_matrix, <span class="dt">mr_params=</span>mr_params);</a></code></pre></div>
 <p>Note that <em>if and only if</em> you provide a <code>ras2vox_matrix</code>, the <em>ras_good</em> flag will be set to <code>TRUE</code> in the file header. If you do not provide <code>mr_params</code>, they default to all zero.</p>
 <div id="mgh-data-types" class="section level3">
 <h3>MGH data types</h3>
@@ -355,50 +355,50 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul>
 <p>You can manually set the ‘dtype’ parameter to force a certain MRI data type. E.g., you could force ‘MRI_SHORT’ for your integer data if you are sure that the supported value range of that data type is enough for the values contained in your data. Be aware though that chosing an unsuitable MRI data type for your data will lead to an MGH file with incorrect data.</p>
 <p><em>Hint</em>: If you need to save data in a certain data type, cast your data before passing them to the <code>write.fs.mgh</code> function. E.g., if you have integers but want to store them as ‘MRI_FLOAT’, do the following:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">    some_surface_mask =<span class="st"> </span><span class="kw">rep</span>(1L, <span class="dv">163842</span>);    </a>
-<a class="sourceLine" id="cb4-2" title="2">    some_surface_mask[<span class="dv">30000</span><span class="op">:</span><span class="dv">45000</span>] =<span class="st"> </span>0L;</a>
-<a class="sourceLine" id="cb4-3" title="3">    <span class="kw">write.fs.mgh</span>(<span class="st">&quot;regionmask_stored_as_MRI_FLOAT.mgh&quot;</span>, <span class="kw">as.double</span>(some_surface_mask));</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">    some_surface_mask =<span class="st"> </span><span class="kw">rep</span>(1L, <span class="dv">163842</span>);    </a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    some_surface_mask[<span class="dv">30000</span><span class="op">:</span><span class="dv">45000</span>] =<span class="st"> </span>0L;</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">    <span class="kw">write.fs.mgh</span>(<span class="st">&quot;regionmask_stored_as_MRI_FLOAT.mgh&quot;</span>, <span class="kw">as.double</span>(some_surface_mask));</a></code></pre></div>
 <p>Notice: That was an example only. For a label, storing the indices as MRI_FLOAT makes little sense (you could use <code>as.logical()</code> instead to store them as as ‘MRI_UCHAR’).</p>
 </div>
 </div>
 <div id="writing-curv-format-files-morphometry-data" class="section level2">
 <h2>Writing ‘curv’ format files (morphometry data)</h2>
 <p>You can use <code>write.fs.curv</code> to write arbitrary data in binary curv format. The result is identical to using <code>write.fs.morph</code> with any filename that does not end in <code>mgh</code> or <code>mgz</code>.)</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">    data =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">120000</span>, <span class="fl">2.0</span>, <span class="fl">1.0</span>);</a>
-<a class="sourceLine" id="cb5-2" title="2">    curvfile =<span class="st"> &quot;mystudy/subject1/surf/lh.random&quot;</span></a>
-<a class="sourceLine" id="cb5-3" title="3">    <span class="kw">write.fs.curv</span>(curvfile, data);</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">    data =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">120000</span>, <span class="fl">2.0</span>, <span class="fl">1.0</span>);</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">    curvfile =<span class="st"> &quot;mystudy/subject1/surf/lh.random&quot;</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">    <span class="kw">write.fs.curv</span>(curvfile, data);</a></code></pre></div>
 <p>It’s worth knowing the if your filename ends with <code>.gz</code>, the file will be written compressed.</p>
 </div>
 <div id="writing-surface-format-files" class="section level2">
 <h2>Writing surface format files</h2>
 <p>You can use <code>write.fs.surface</code> to write triangular meshes in binary surface format (the format used for files like ‘surf/lh.white’ or ‘surf/rh.pial’). A mesh is defined by a list of vertices and a list of faces as indices into the latter, knows as an <em>indexed face-set</em>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">    vertices =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(<span class="fl">0.3</span>, <span class="dv">15</span>), <span class="dt">nrow=</span><span class="dv">3</span>);     <span class="co"># 5 vertices</span></a>
-<a class="sourceLine" id="cb6-2" title="2">    faces =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(1L,2L,3L,2L,4L,3L,4L,5L,3L), <span class="dt">nrow=</span><span class="dv">3</span>, <span class="dt">byrow =</span> <span class="ot">TRUE</span>);   <span class="co"># 3 faces</span></a>
-<a class="sourceLine" id="cb6-3" title="3"></a>
-<a class="sourceLine" id="cb6-4" title="4">    <span class="kw">write.fs.surface</span>(<span class="kw">tempfile</span>(<span class="dt">fileext=</span><span class="st">&quot;white&quot;</span>), vertices, faces);</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">    vertices =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(<span class="fl">0.3</span>, <span class="dv">15</span>), <span class="dt">nrow=</span><span class="dv">3</span>);     <span class="co"># 5 vertices</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">    faces =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(1L,2L,3L,2L,4L,3L,4L,5L,3L), <span class="dt">nrow=</span><span class="dv">3</span>, <span class="dt">byrow =</span> <span class="ot">TRUE</span>);   <span class="co"># 3 faces</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">    <span class="kw">write.fs.surface</span>(<span class="kw">tempfile</span>(<span class="dt">fileext=</span><span class="st">&quot;white&quot;</span>), vertices, faces);</a></code></pre></div>
 <p>The vertex indices used to define the faces should be 1-based, as used in R. They will be written 0-based to the file.</p>
 <p>You can also use this function to write meshes in FreeSurfer ASCII format (<code>.asc</code>) or in VTK ASCII format (<code>.vtk</code>), see the parameter <code>format</code> for details.</p>
 </div>
 <div id="writing-label-files" class="section level2">
 <h2>Writing label files</h2>
 <p>Labels can be written with the <code>write.fs.label</code> function. A label is nothing but a list of vertex indices. These indices should be passed 1-based, as they are used in <code>R</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">output_file =<span class="st"> </span><span class="kw">tempfile</span>();</a>
-<a class="sourceLine" id="cb7-2" title="2"></a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="co"># generate data</span></a>
-<a class="sourceLine" id="cb7-4" title="4">vertex_indices =<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">10000</span>, <span class="dt">to=</span><span class="dv">20000</span>);</a>
-<a class="sourceLine" id="cb7-5" title="5"></a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="co"># write label to file</span></a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="kw">write.fs.label</span>(output_file, vertex_indices);</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">output_file =<span class="st"> </span><span class="kw">tempfile</span>();</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="co"># generate data</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">vertex_indices =<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">10000</span>, <span class="dt">to=</span><span class="dv">20000</span>);</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co"># write label to file</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="kw">write.fs.label</span>(output_file, vertex_indices);</a></code></pre></div>
 <p>You can attach a single floating point value to each vertex of the label, see the parameter ‘vertex_data’ for details.</p>
 </div>
 <div id="writing-color-lookup-table-lut-files-in-ascii-format" class="section level2">
 <h2>Writing color lookup table (LUT) files in ASCII format</h2>
 <p>The following example uses the <code>write.fs.colortable</code> function to write a colortable:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">colortable_df =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">&quot;struct_index&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="st">&quot;struct_name&quot;</span>=<span class="kw">c</span>(<span class="st">&quot;struct1&quot;</span>, <span class="st">&quot;struct2&quot;</span>),</a>
-<a class="sourceLine" id="cb8-2" title="2">                  <span class="st">&quot;r&quot;</span>=<span class="kw">c</span>(<span class="dv">80</span>, <span class="dv">100</span>), <span class="st">&quot;g&quot;</span>=<span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">40</span>), <span class="st">&quot;b&quot;</span>=<span class="kw">c</span>(<span class="dv">250</span>, <span class="dv">200</span>), <span class="st">&quot;a&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>);</a>
-<a class="sourceLine" id="cb8-3" title="3"></a>
-<a class="sourceLine" id="cb8-4" title="4">output_file =<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.txt&quot;</span>);</a>
-<a class="sourceLine" id="cb8-5" title="5"><span class="kw">write.fs.colortable</span>(output_file, colortable_df);</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">colortable_df =<span class="st"> </span><span class="kw">data.frame</span>(<span class="st">&quot;struct_index&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="st">&quot;struct_name&quot;</span>=<span class="kw">c</span>(<span class="st">&quot;struct1&quot;</span>, <span class="st">&quot;struct2&quot;</span>),</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">                  <span class="st">&quot;r&quot;</span>=<span class="kw">c</span>(<span class="dv">80</span>, <span class="dv">100</span>), <span class="st">&quot;g&quot;</span>=<span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">40</span>), <span class="st">&quot;b&quot;</span>=<span class="kw">c</span>(<span class="dv">250</span>, <span class="dv">200</span>), <span class="st">&quot;a&quot;</span>=<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>);</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">output_file =<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.txt&quot;</span>);</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="kw">write.fs.colortable</span>(output_file, colortable_df);</a></code></pre></div>
 <p>A colortable is a table that contains one structure per row, and assigns each structure an RGBA color. Colortables are typically used to color the different brain regions of the segmented brain volume. The file ‘FreeSurferColorLUT.txt’ that comes with FreeSurfer is an example for a colortable.</p>
 </div>
 </div>
