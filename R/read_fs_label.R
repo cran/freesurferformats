@@ -1,3 +1,35 @@
+
+
+#' @title Read a label file.
+#'
+#' @inheritParams read.fs.label.native
+#'
+#' @param format character string, one of 'auto' to detect by file extension, 'asc' for native FreeSurfer ASCII label format, or 'gii' for GIFTI label format.
+#'
+#' @param ... extra paramters passed to the respective label function for the format
+#'
+#' @family label functions
+#'
+#' @note See \code{\link{read.fs.label.native}} for more details, including important information on loading FreeSurfer volume labels.
+#'
+#' @examples
+#'     labelfile = system.file("extdata", "lh.entorhinal_exvivo.label",
+#'       package = "freesurferformats", mustWork = TRUE);
+#'     label = read.fs.label(labelfile);
+#' @export
+read.fs.label <- function(filepath, format = 'auto', ...) {
+  if(!(format %in% c('auto', 'gii', 'asc'))) {
+    stop("Format must be one of c('auto', 'gii', 'asc').");
+  }
+
+  if(format == 'gii' | (format == 'auto' & filepath.ends.with(filepath, c('.gii')))) {
+    return(read.fs.label.gii(filepath, ...));
+  }
+
+  return(read.fs.label.native(filepath, ...));
+}
+
+
 #' @title Read file in FreeSurfer label format
 #'
 #' @description Read a mask in FreeSurfer label format. A label defines a list of vertices (of an associated surface or morphometry file) which are part of it. All others are not. You can think of it as binary mask. Label files are ASCII text files, which have 5 columns (vertex index, coord1, coord2, coord3, value), but only the vertex indices are of interest. A label can also contain voxels, in that case the indices are -1 and the coordinates are important.
@@ -23,7 +55,7 @@
 #'
 #' @export
 #' @importFrom utils read.table
-read.fs.label <- function(filepath, return_one_based_indices=TRUE, full=FALSE, metadata=list()) {
+read.fs.label.native <- function(filepath, return_one_based_indices=TRUE, full=FALSE, metadata=list()) {
 
     # The first line is a comment, and the 2nd one contains a single number: the number of vertex lines following.
     num_verts_df = read.table(filepath, skip=1L, nrows=1L, col.names = c('num_verts'), colClasses = c("integer"));
@@ -33,7 +65,7 @@ read.fs.label <- function(filepath, return_one_based_indices=TRUE, full=FALSE, m
     vertices = vertices_df$vertex_index;
 
     if(length(vertices) != num_verts) {
-      stop(sprintf("Expected %d vertex rows in label file '%s' from header, but received %d.\n", num_verts, filepath, length(vertices)));
+      stop(sprintf("Expected %d vertex rows in label file '%s' from header, but received %d.\n", num_verts, filepath, length(vertices)));   # nocov
     }
 
     if(any(vertices < 0L)) {
@@ -74,7 +106,7 @@ read.fs.label <- function(filepath, return_one_based_indices=TRUE, full=FALSE, m
 #' @param ... further arguments passed to or from other methods
 #'
 #' @export
-print.fs.label <- function(x, ...) {
+print.fs.label <- function(x, ...) {   # nocov start
   if(nrow(x$vertexdata) > 0L) {
     vertex_data_range = range(x$vertexdata$value);
 
@@ -96,7 +128,7 @@ print.fs.label <- function(x, ...) {
   } else {
     cat(sprintf("Brain label containing %d entries.\n", nrow(x$vertexdata)));
   }
-}
+} # nocov end
 
 
 #' @title Check whether object is an fs.label
@@ -140,15 +172,15 @@ read.fs.label.gii <- function(filepath, label_value=1L, element_index=1L) {
     gii = gifti::read_gifti(filepath);
     intent = gii$data_info$Intent[[element_index]];
     if(intent != 'NIFTI_INTENT_LABEL') {
-      warning(sprintf("The intent of the gifti file is '%s', expected 'NIFTI_INTENT_LABEL'.\n", intent));
+      warning(sprintf("The intent of the gifti file is '%s', expected 'NIFTI_INTENT_LABEL'.\n", intent)); # nocov
     }
     if(is.null(gii$label)) {
-      stop(sprintf("The gifti file '%s' does not contain label information.\n", filepath));
+      stop(sprintf("The gifti file '%s' does not contain label information.\n", filepath));  # nocov
     } else {
 
-      label_data_num_columns = ncol(gii$data[[element_index]]); # must be 1D for surface labels: 1 column of vertex indices (the data is returned as a matrix).
+      #label_data_num_columns = ncol(gii$data[[element_index]]); # must be 1D for surface labels: 1 column of vertex indices (the data is returned as a matrix).
       if(gii$data_info$Dimensionality != 1L) {
-        stop(sprintf("Label data has %d dimensions, expected 1. This does not look like a 1D surface label.\n", gii$data_info$Dimensionality));
+        stop(sprintf("Label data has %d dimensions, expected 1. This does not look like a 1D surface label.\n", gii$data_info$Dimensionality));  # nocov
       }
 
       annot_data = as.integer(gii$data[[element_index]]); # note that as.integer() turns the (1 column) matrix into a vector.
@@ -156,12 +188,12 @@ read.fs.label.gii <- function(filepath, label_value=1L, element_index=1L) {
       # Note: gifti labels seem to be more like a mask or an annotation: they assign a value to each vertex of the surface instead of listing
       # all vertices which are part of the label. Reading them as a label in the FreeSurfer sense potentially means losing
       # information (if they contain more than 2 region types). If they only contain positive/negative labels, it is fine.
-      num_regions_in_annot = nrow(gii$label);
+      #num_regions_in_annot = nrow(gii$label);
       return(which(annot_data == label_value));
     }
 
   } else {
-    stop("The 'gifti' package must be installed to use this functionality.");
+    stop("The 'gifti' package must be installed to use this functionality.");   # nocov
   }
 
 }

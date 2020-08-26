@@ -4,7 +4,7 @@
 #'
 #' @param filepath string. Full path to the input weight file. Weight files typically have the file extension '.w', but that is not enforced.
 #'
-#' @param format one of 'auto', 'asc', or 'bin'. The format to assume. If set to 'auto' (the default), binary format will be used unless the filepath ends with '.w.asc'.
+#' @param format one of 'auto', 'asc', or 'bin'. The format to assume. If set to 'auto' (the default), binary format will be used unless the filepath ends with '.asc'.
 #'
 #' @return the indices and weight data, as a named list. Entries: "vertex_indices": vector of *n* vertex indices. They are stored zero-based in the file, but are returned one-based (R-style). "value": double vector of length *n*, the morphometry data for the vertices. The data can be whatever you want.
 #'
@@ -21,19 +21,12 @@ read.fs.weight <- function(filepath, format='auto') {
     return(read.fs.weight.asc(filepath));
   }
 
-
-  if(filepath.ends.with(filepath, c(".w.asc"))) {
-    return(read.fs.weight.asc(filepath));
-  }
-
   if(guess.filename.is.gzipped(filepath)) {
     fh = gzfile(filepath, "rb");
   } else {
     fh = file(filepath, "rb");
   }
   on.exit({ close(fh) }, add=TRUE);
-
-  ret_list = list();
 
   latency = readBin(fh, integer(), size = 2L, n = 1, endian = "big");
   num_vertex_value_pairs = fread3(fh);
@@ -47,13 +40,13 @@ read.fs.weight <- function(filepath, format='auto') {
     vertex_index[read_idx] = fread3(fh);
     vertex_value[read_idx] = readBin(fh, numeric(), size = 4, n = 1, endian = "big");
   }
-  return(list("vertex_indices"=vertex_index + 1, "values"=vertex_value));
+  return(list("vertex_indices"=vertex_index + 1L, "values"=vertex_value));
 }
 
 
 #' Read ASCII version of FreeSurfer weight file.
 #'
-#' @description Called by \code{\link[freesurferformats]{read.fs.weight}} if parameter `format` is set to 'asc'.
+#' @description Read ASCII version of FreeSurfer weight file. Called by \code{\link[freesurferformats]{read.fs.weight}} if parameter `format` is set to 'asc'.
 #'
 #' @param filepath string. Full path to the input weight file, must be in ASCII weight format.
 #'
@@ -68,9 +61,9 @@ read.fs.weight.asc <- function(filepath) {
   pairs_df = read.table(filepath, skip=2L, col.names = c('vertex_index', 'value'), colClasses = c("integer", "numeric"), nrows=num_pairs);
 
   if(nrow(pairs_df) != num_pairs) {
-    stop(sprintf("Expected %d vertex values from ASCII weight file header, but received %d.\n", num_pairs, nrow(pairs_df)));
+    stop(sprintf("Expected %d vertex values from ASCII weight file header, but received %d.\n", num_pairs, nrow(pairs_df)));   # nocov
   }
-  return(list("vertex_indices"=pairs_df$vertex_index + 1, "values"=pairs_df$value));
+  return(list("vertex_indices"=pairs_df$vertex_index + 1L, "values"=pairs_df$value));
 }
 
 

@@ -27,15 +27,15 @@ read.fs.curv <- function(filepath, format='auto') {
     }
 
     if(format == 'asc' | (format == 'auto' & filepath.ends.with(filepath, c('.asc')))) {
-      return(read.fs.curv.asc(filepath));
+      return(read.fs.morph.asc(filepath));
     }
 
     if(format == 'txt' | (format == 'auto' & filepath.ends.with(filepath, c('.txt')))) {
-      return(read.fs.curv.txt(filepath));
+      return(read.fs.morph.txt(filepath));
     }
 
     if(guess.filename.is.gzipped(filepath)) {
-        fh = gzfile(filepath, "rb");
+        fh = gzfile(filepath, "rb");  # nocov
     } else {
         fh = file(filepath, "rb");
     }
@@ -43,7 +43,7 @@ read.fs.curv <- function(filepath, format='auto') {
 
     magic_byte = fread3(fh);
     if (magic_byte != MAGIC_FILE_TYPE_NUMBER) {
-        stop(sprintf("Magic number mismatch (%d != %d). The given file '%s' is not a valid FreeSurfer 'curv' format file in new binary format. (Hint: This function is designed to read files like 'lh.area' in the 'surf' directory of a pre-processed FreeSurfer subject.)\n", magic_byte, MAGIC_FILE_TYPE_NUMBER, filepath));
+        stop(sprintf("Magic number mismatch (%d != %d). The given file '%s' is not a valid FreeSurfer 'curv' format file in new binary format. (Hint: This function is designed to read files like 'lh.area' in the 'surf' directory of a pre-processed FreeSurfer subject.)\n", magic_byte, MAGIC_FILE_TYPE_NUMBER, filepath)); # nocov
     }
     num_verts = readBin(fh, integer(), n = 1, size = 4, endian = "big");
     num_faces = readBin(fh, integer(), n = 1, size = 4, endian = "big");
@@ -61,8 +61,8 @@ read.fs.curv <- function(filepath, format='auto') {
 #'
 #' @note This format is also known as *dpv* (data-per-vertex) format.
 #'
-#' @keywords internal
-read.fs.curv.asc <- function(filepath) {
+#' @export
+read.fs.morph.asc <- function(filepath) {
   curv_df = read.table(filepath, header=FALSE, col.names=c("vert_index", "coord_x", "coord_y", "coord_z", "morph_data"), colClasses = c("integer", "numeric", "numeric", "numeric", "numeric"));
   return(curv_df$morph_data);
 }
@@ -74,8 +74,8 @@ read.fs.curv.asc <- function(filepath) {
 #'
 #' @return numeric vector, the curv data
 #'
-#' @keywords internal
-read.fs.curv.txt <- function(filepath) {
+#' @export
+read.fs.morph.txt <- function(filepath) {
   curv_df = read.table(filepath, header=FALSE, col.names=c("morph_data"), colClasses = c("numeric"));
   return(curv_df$morph_data);
 }
@@ -128,8 +128,8 @@ fread3 <- function(filehandle) {
 #'
 #' @export
 read.fs.morph <- function(filepath, format='auto') {
-    if(! format %in% c("auto", "mgh", "mgz", "curv", "gii")) {
-        stop("Format must be one of 'auto', 'mgh', 'mgz', 'curv', or 'gii'.");
+    if(! format %in% c("auto", "mgh", "mgz", "curv", "gii", "smp")) {
+        stop("Format must be one of 'auto', 'mgh', 'mgz', 'curv', 'smp', or 'gii'.");
     }
 
     if(format == 'auto') {
@@ -140,6 +140,8 @@ read.fs.morph <- function(filepath, format='auto') {
         data = read.fs.mgh(filepath, flatten=TRUE);
     } else if(format == "gii") {
         data = read.fs.morph.gii(filepath);
+    } else if(format == "smp") {
+      data = read.fs.morph.bvsmp(filepath);
     } else {
         data = read.fs.curv(filepath);
     }
@@ -165,21 +167,58 @@ read.fs.morph <- function(filepath, format='auto') {
 #' @export
 read.fs.morph.gii <- function(filepath, element_index=1L) {
   if(element_index < 1L) {
-    stop("Parameter 'element_index' must be a positive integer.");
+    stop("Parameter 'element_index' must be a positive integer."); # nocov
   }
   if (requireNamespace("gifti", quietly = TRUE)) {
       # Try to read via gifti package
       gii = gifti::read_gifti(filepath);
       if(element_index > length(gii$data)) {
-        stop(sprintf("Requested data element at index '%d', but GIFTI file contains %d elements only.\n", element_index, length(gii$data)));
+        stop(sprintf("Requested data element at index '%d', but GIFTI file contains %d elements only.\n", element_index, length(gii$data))); # nocov
       }
       # Data may be stored in a matrix or higher dim array (with empty dimensions in case of vertex-wise data). Drop the empty dims to get a vector.
       morph_data = drop(gii$data[[element_index]]);
       if(! is.null(dim(morph_data))) {
-        stop("Dropping empty dimensions of the GIFTI data did not result in a vector. The data in the file cannot be interpreted as scalar per-vertex data.");
+        stop("Dropping empty dimensions of the GIFTI data did not result in a vector. The data in the file cannot be interpreted as scalar per-vertex data."); # nocov
       }
       return(morph_data);
   } else {
-    stop("Reading files in GIFTI format requires the 'gifti' package to be installed.");
+    stop("Reading files in GIFTI format requires the 'gifti' package to be installed."); # nocov
   }
 }
+
+
+#' @title Read Brainvoyager vertex-wise statistical surface data from SMP file.
+#'
+#' @param filepath character string, path to file in Brainvoyager SMP file format. Alternatively, a 'bvsmp' instance read with \code{\link{read.smp.brainvoyager}}.
+#'
+#' @param map_index positive integer or character string, the surface value map to load (an SMP file can contain several values per vertex, i.e., several surface maps). If an integer, interpreted as the index of the map. If a character string, as the name of the map.
+#'
+#' @return numeric vector, the values from the respective map.
+#'
+#' @export
+read.fs.morph.bvsmp <- function(filepath, map_index = 1L) {
+  if(is.bvsmp(filepath)) {
+    smp = filepath;
+  } else {
+    smp = read.smp.brainvoyager(filepath);
+  }
+
+  if(is.integer(map_index)) {
+    if(map_index > smp$num_maps) {
+      stop(sprintf("Requested SMP statistical map # %d, but file contains only %d maps.\n", map_index, smp$num_maps));
+    }
+    return(smp$vertex_maps[[map_index]]$data);
+  } else {
+    requested_map_name = map_index;
+    available_maps = c();
+    for(mi in seq.int(smp$num_maps)) {
+      if(smp$vertex_maps[[mi]]$map_name == requested_map_name) {
+        return(smp$vertex_maps[[mi]]$data);
+        available_maps = c(available_maps, smp$vertex_maps[[mi]]$name);
+      }
+    }
+    stop(sprintf("Requested map not found, available maps: %s \n", paste(available_maps, collapse = ", ")));
+  }
+}
+
+

@@ -1,4 +1,4 @@
-# I feel there are some standard R functions for these...
+# I guess there are some standard R functions for these.
 
 #' @title Rotate a 2D matrix in 90 degree steps.
 #'
@@ -11,7 +11,11 @@
 #' @export
 rotate2D <- function(slice, degrees=90) {
   if(length(dim(slice)) != 2L) {
-    stop("Slice must be a 2D matrix.");
+    if(is.vector(slice)) {
+      return(slice); # return vector as is
+    } else {
+      stop("Slice must be a 2D matrix.");
+    }
   }
   degrees = as.integer(degrees %% 360L);
   if(!degrees %in% as.integer(c(0, 90, 180, 270))) {
@@ -69,6 +73,9 @@ rotate3D <- function(volume, axis=1L, degrees=90L) {
   if(length(dim(volume)) != 3) {
     stop(sprintf("Volume must have exactly 3 dimensions but has %d.\n", length(dim(volume))));
   }
+  if(! is.numeric(axis)) {
+    stop("Parameter 'axis' must be numeric.");
+  }
   axis = as.integer(axis);
   if(axis < 1L | axis > 3L) {
     stop(sprintf("Axis must be integer with value 1, 2 or 3 but is %d.\n", axis));
@@ -119,7 +126,7 @@ rotate3D <- function(volume, axis=1L, degrees=90L) {
 #'
 #' @param axis positive integer in range 1L..3L or an axis name, the axis to use.
 #'
-#' @param how character string, one of 'horizontally' or 'vertically'. How to flip the 2D slices. Note that flipping *horizontally* means that the image will be mirrored along the central *vertical* axis.
+#' @param how character string, one of 'horizontally' / 'h' or 'vertically' / 'v'. How to flip the 2D slices. Note that flipping *horizontally* means that the image will be mirrored along the central *vertical* axis.
 #'
 #' @return a 3D image volume, flipped around the axis. The dimensions are identical to the dimensions of the input image.
 #'
@@ -162,7 +169,7 @@ flip3D <- function(volume, axis=1L, how='horizontally') {
 #'
 #' @param slice a 2D matrix
 #'
-#' @param how character string, one of 'vertically' or 'horizontally'. Note that flipping *horizontally* means that the image will be mirrored along the central *vertical* axis. If `NULL` is passed, the passed value is returned unaltered.
+#' @param how character string, one of 'vertically' / 'v' or 'horizontally' / 'h'. Note that flipping *horizontally* means that the image will be mirrored along the central *vertical* axis. If `NULL` is passed, the passed value is returned unaltered.
 #'
 #' @return 2D matrix, the flipped matrix.
 #'
@@ -172,21 +179,20 @@ flip2D <- function(slice, how='horizontally') {
     return(slice);
   }
 
-  if(how == 'vertically') {
+  if(how == 'vertically' | how == 'v') {
     axis = 2L;
-  } else if(how == 'horizontally') {
+  } else if(how == 'horizontally' | how == 'h') {
     axis = 1L;
   } else {
     stop("How must be one of 'vertically' or 'horizontally' (or NULL for noop).");
   }
 
-  axis = as.integer(axis);
-  if(axis < 1L | axis > 2L) {
-    stop(sprintf("Axis must be integer with value 1 or 2 but is %d.\n", axis));
-  }
-
   if(length(dim(slice)) != 2L) {
-    stop("Slice must be a 2D matrix.");
+    if(is.vector(slice)) {
+      return(slice); # return vector as is
+    } else {
+      stop("Slice must be a 2D matrix.");
+    }
   }
   if(axis == 1L) {
     return(slice[nrow(slice):1,]);

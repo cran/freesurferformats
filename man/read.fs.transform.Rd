@@ -4,15 +4,15 @@
 \alias{read.fs.transform}
 \title{Load transformation matrix from a file.}
 \usage{
-read.fs.transform(filepath, format = "xfm")
+read.fs.transform(filepath, format = "auto")
 }
 \arguments{
 \item{filepath}{character string, the full path to the transform file.}
 
-\item{format}{character string, the file format. Currently only 'xfm' is supported.}
+\item{format}{character string, the file format. Currently 'auto' (guess based on file extension), 'xfm' (for xform format) or 'dat' (for tkregister style, e.g. register.dat) are supported.}
 }
 \value{
-4x4 numerical matrix, the transformation matrix
+named list, the 'matrix field contains a '4x4 numerical matrix, the transformation matrix. Other fields may exist, depending on the parsed format.
 }
 \description{
 Load transformation matrix from a file.
@@ -36,6 +36,11 @@ Other header coordinate space:
 \code{\link{mghheader.scanner2tkreg}()},
 \code{\link{mghheader.tkreg2scanner}()},
 \code{\link{mghheader.vox2ras.tkreg}()},
-\code{\link{mghheader.vox2ras}()}
+\code{\link{mghheader.vox2ras}()},
+\code{\link{read.fs.transform.dat}()},
+\code{\link{read.fs.transform.lta}()},
+\code{\link{read.fs.transform.xfm}()},
+\code{\link{sm0to1}()},
+\code{\link{sm1to0}()}
 }
 \concept{header coordinate space}

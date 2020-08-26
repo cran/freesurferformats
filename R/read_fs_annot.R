@@ -5,7 +5,7 @@
 #'
 #' @param filepath string. Full path to the input annotation file. Note: gzipped files are supported and gz format is assumed if the filepath ends with ".gz".
 #'
-#' @param empty_label_name string. The region name to assign to regions with empty name. Defaults to 'unknown'. Set to NULL if you want to keep the empty region name.
+#' @param empty_label_name string. Ignored, deprecated.
 #'
 #' @param metadata named list of arbitrary metadata to store in the instance.
 #'
@@ -55,7 +55,7 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
                 colortable = readcolortable(fh, ctable_num_entries);
             }
             else {
-                stop(sprintf("Unsupported annotation file version '%d'.\n", version));
+                stop(sprintf("Unsupported annotation file version '%d'.\n", version));   # nocov
             }
         }
         return_list$colortable = colortable;
@@ -80,11 +80,6 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
           label_code = code[i];
           label_name = colortable$struct_names[i];
           hex_color_string_rgb = grDevices::rgb(colortable$table[i,1]/255., colortable$table[i,2]/255., colortable$table[i,3]/255.);
-          if(nchar(empty_label_name) > 0 && nchar(label_name) == 0) {
-            warning(sprintf("Replacing empty label name with '%s'\n", empty_label_name));
-            label_name = paste(empty_label_name, nempty, sep="");
-            nempty = nempty + 1L;
-          }
           label_names[labels==label_code] = label_name;
           hex_colors_rgb[labels==label_code] = hex_color_string_rgb;
         }
@@ -104,7 +99,7 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
 #' @param ... further arguments passed to or from other methods
 #'
 #' @export
-print.fs.annot <- function(x, ...) {
+print.fs.annot <- function(x, ...) { # nocov start
   if(is.null(x$colortable)) {
     print(sprintf("Brain surface annotation without colortable for %d vertices containing %d unique region codes.", length(x$vertices), length(unique(x$label_codes))));
   } else {
@@ -113,7 +108,7 @@ print.fs.annot <- function(x, ...) {
       cat(sprintf(" - region #%d '%s': size %d vertices\n", region_idx, as.character(x$colortable_df$struct_name[[region_idx]]), sum(x$label_codes == x$colortable_df$code[[region_idx]])));
     }
   }
-}
+} # nocov end
 
 
 #' @title Check whether object is an fs.annot
@@ -198,7 +193,7 @@ readcolortable <- function(fh, ctable_num_entries) {
     # There is another field here which also encodes the number of entries.
     ctable_num_entries_2nd = readBin(fh, integer(), n = 1, endian = "big");
     if(ctable_num_entries != ctable_num_entries_2nd) {
-      warning(sprintf("Meta data on number of color table mismatches: %d versus %d.\n", ctable_num_entries, ctable_num_entries_2nd));
+      warning(sprintf("Meta data on number of color table mismatches: %d versus %d.\n", ctable_num_entries, ctable_num_entries_2nd));   # nocov
     }
 
     for (i in seq_len(ctable_num_entries)) {
@@ -206,13 +201,13 @@ readcolortable <- function(fh, ctable_num_entries) {
 
         # Index must not be negative:
         if (struct_idx < 0L) {
-            stop(sprintf("Invalid struct index in color table entry #%d: index must not be negative but is '%d'.\n", i, struct_idx));
+            stop(sprintf("Invalid struct index in color table entry #%d: index must not be negative but is '%d'.\n", i, struct_idx));   # nocov
         }
 
         name_so_far = colortable$struct_names[struct_idx];
         # The same structure must not occur more than once (so the name should still be the empty string from the initialization when setting it):
         if (!identical(name_so_far, "")) {
-            warning(sprintf("Annotation file entry #%d struct index %d: entry with identical name '%s' already hit, this must not happen. Brain structure names must be unique.\n", i, struct_idx, name_so_far));
+            warning(sprintf("Annotation file entry #%d struct index %d: entry with identical name '%s' already hit, this must not happen. Brain structure names must be unique.\n", i, struct_idx, name_so_far)); # nocov
         }
         entry_num_chars = readBin(fh, integer(), n = 1, endian = "big");
 
@@ -339,15 +334,15 @@ read.fs.annot.gii <- function(filepath, element_index=1L, labels_only=FALSE, rgb
     gii = gifti::read_gifti(filepath);
     intent = gii$data_info$Intent[[element_index]];
     if(intent != 'NIFTI_INTENT_LABEL') {
-      warning(sprintf("The intent of the gifti file is '%s', expected 'NIFTI_INTENT_LABEL'.\n", intent));
+      warning(sprintf("The intent of the gifti file is '%s', expected 'NIFTI_INTENT_LABEL'.\n", intent));  # nocov
     }
     if(is.null(gii$label)) {
-      stop(sprintf("The gifti file '%s' does not contain label information.\n", filepath));
+      stop(sprintf("The gifti file '%s' does not contain label information.\n", filepath));   # nocov
     } else {
 
-      label_data_num_columns = ncol(gii$data[[element_index]]); # must be 1D for surface labels: 1 column of vertex indices (the data is returned as a matrix).
+      #label_data_num_columns = ncol(gii$data[[element_index]]); # must be 1D for surface labels: 1 column of vertex indices (the data is returned as a matrix).
       if(gii$data_info$Dimensionality != 1L) {
-        stop(sprintf("Label data has %d dimensions, expected 1. This does not look like a 1D surface label.\n", gii$data_info$Dimensionality));
+        stop(sprintf("Label data has %d dimensions, expected 1. This does not look like a 1D surface label.\n", gii$data_info$Dimensionality));  # nocov
       }
 
       labels = as.integer(gii$data[[element_index]]); # note that as.integer() turns the (1 column) matrix into a vector.
@@ -407,13 +402,13 @@ read.fs.annot.gii <- function(filepath, element_index=1L, labels_only=FALSE, rgb
       b = colortable$table[,3];
       a = colortable$table[,4];
       code = colortable$table[,5];
+
+      max_color_value = 1.0;
       if(max(r) > 1.1) { # colors are in range 0-255
-        hex_color_string_rgb = grDevices::rgb(r/255., g/255., b/255.);
-        hex_color_string_rgba = grDevices::rgb(r/255., g/255., b/255., a/255);
-      } else { # colors are in range 0-1
-        hex_color_string_rgb = grDevices::rgb(r, g, b);
-        hex_color_string_rgba = grDevices::rgb(r, g, b, a);
+        max_color_value = 255;
       }
+      hex_color_string_rgb = grDevices::rgb(r, g, b, maxColorValue = max_color_value);
+      hex_color_string_rgba = grDevices::rgb(r, g, b, a, maxColorValue = max_color_value);
 
       colortable_df = data.frame(colortable$struct_names, r, g, b, a, code, hex_color_string_rgb, hex_color_string_rgba, stringsAsFactors = FALSE);
       colnames(colortable_df) = c("struct_name", "r", "g", "b", "a", "code", "hex_color_string_rgb", "hex_color_string_rgba");
@@ -442,8 +437,124 @@ read.fs.annot.gii <- function(filepath, element_index=1L, labels_only=FALSE, rgb
     }
 
   } else {
-    stop("The 'gifti' package must be installed to use this functionality.");
+    stop("The 'gifti' package must be installed to use this functionality.");    # nocov
   }
+}
+
+
+#' @title Read FreeSurfer GCA file.
+#'
+#' @param filepath character string, path to a file in binary GCA format. Stores array of Gaussian classifiers for probabilistic atlas.
+#'
+#' @return named list, the file fields. The GCA data is in the data field.
+#'
+#' @author This function is based on Matlab code by Bruce Fischl, published under the FreeSurfer Open Source License available at \url{https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense}. The R version was written by Tim Schaefer.
+#'
+#' @examples
+#' \dontrun{
+#' gca_file = file.path(Sys.getenv('FREESURFER_HOME'), 'average', 'face.gca');
+#' gca = read.fs.gca(gca_file);
+#' }
+#'
+#' @export
+read.fs.gca <- function(filepath) {
+  fh = file(filepath, "rb");
+  on.exit({ close(fh) }, add = TRUE);
+  endian = "big";
+  ret_list = list();
+
+  gca_num_mrf = 1L;
+  max_labels = 4L;
+  gibbs_neighborhood_size = 6L;
+
+  ret_list$gca_version = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+  if(ret_list$gca_version < 1.0 | ret_list$gca_version > 4.0) {
+    stop(sprintf("Invalid GCA file format version in file header: %f\n", ret_list$gca_version));
+  }
+
+  ret_list$prior_spacing = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+  ret_list$node_spacing = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+
+  prior_width = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+  prior_height = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+  prior_depth = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+
+  node_width = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+  node_height = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+  node_depth = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+
+  ret_list$num_inputs = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+  flags = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+
+  gca = matrix(nrow = (prior_width * prior_height * prior_depth), ncol = (2L * max_labels + 1L));
+  #cat(sprintf("Prior dimension: %d x %d x %d, spacing=%d, version=%f\n", prior_width, prior_height, prior_depth, ret_list$prior_spacing, ret_list$gca_version));
+  #cat(sprintf("Node dimension: %d x %d x %d, num_inputs=%d, flags=%d\n", node_width, node_height, node_depth, ret_list$num_inputs, flags));
+  #cat(sprintf("GCA dimension: %d x %d\n", dim(gca)[1], dim(gca)[2]));
+
+  gca_row_idx = 1L;
+  for(idx_x in seq.int(node_width)) {
+    #cat(sprintf("[Node] Reading slice %d of %d.\n", idx_x, node_width));
+    for(idx_y in seq.int(node_height)) {
+      for(idx_z in seq.int(node_depth)) {
+        num_labels = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+        total_training = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+        gca[gca_row_idx, 1L] = num_labels;
+
+        if(num_labels > 0L) {
+          for(label_idx in seq.int(num_labels)) {
+            label = readBin(fh, integer(), size = 1, n = 1, signed = FALSE, endian = endian);
+            lmean = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+            lmean = NULL;     # not used
+            lvar = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+            lvar = NULL;     # not used
+            if(bitwAnd(flags, gca_num_mrf)) {
+              next;
+            }
+            for(gibbs_idx in seq.int(gibbs_neighborhood_size)) {
+              num_gibbs_labels = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+              for(gibbs_label_idx in seq.int(num_gibbs_labels)) {
+                gibbs_label = readBin(fh, integer(), size = 4, n = 1, endian = endian); # TODO: must be uint32
+                gibbs_label = NULL;  # not used
+                gibbs_prior = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+                gibbs_prior = NULL;  # not used
+              }
+            }
+
+          }
+        }
+        gca_row_idx = gca_row_idx + 1L;
+      }
+    }
+  }
+
+  gca_row_idx = 1L;
+  for(idx_x in seq.int(prior_width)) {
+    #cat(sprintf("[Prior] Reading slice %d of %d.\n", idx_x, prior_width));
+    for(idx_y in seq.int(prior_height)) {
+      for(idx_z in seq.int(prior_depth)) {
+        num_labels = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+        total_training = readBin(fh, integer(), size = 4, n = 1, endian = endian);
+        gca[gca_row_idx, 1L] = num_labels;
+
+        if(num_labels > 0L) {
+          for(label_idx in seq.int(num_labels)) {
+            label = readBin(fh, integer(), size = 1, n = 1, signed = FALSE, endian = endian);
+            prior = readBin(fh, numeric(), size = 4, n = 1, endian = endian);
+
+            if(label_idx <= max_labels) {
+              gca[gca_row_idx, (2L * label_idx)] = label;
+              gca[gca_row_idx, (2L * label_idx + 1L)] = prior;
+            }
+
+          }
+        }
+        gca_row_idx = gca_row_idx + 1L;
+      }
+    }
+  }
+
+  ret_list$data = gca;
+  return(ret_list);
 }
 
 

@@ -24,6 +24,8 @@ This is also known as the 'tkreg' ras2vox. It is the inverse of the respective v
 
 }
 \seealso{
+\code{\link{sm1to0}}
+
 Other header coordinate space: 
 \code{\link{mghheader.is.ras.valid}()},
 \code{\link{mghheader.ras2vox}()},
@@ -31,6 +33,11 @@ Other header coordinate space:
 \code{\link{mghheader.tkreg2scanner}()},
 \code{\link{mghheader.vox2ras.tkreg}()},
 \code{\link{mghheader.vox2ras}()},
-\code{\link{read.fs.transform}()}
+\code{\link{read.fs.transform.dat}()},
+\code{\link{read.fs.transform.lta}()},
+\code{\link{read.fs.transform.xfm}()},
+\code{\link{read.fs.transform}()},
+\code{\link{sm0to1}()},
+\code{\link{sm1to0}()}
 }
 \concept{header coordinate space}

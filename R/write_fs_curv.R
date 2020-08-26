@@ -35,6 +35,58 @@ write.fs.curv <- function(filepath, data) {
 }
 
 
+#' @title Write file in FreeSurfer ASCII curv format
+#'
+#' @description Write vertex-wise brain surface data to a file in FreeSurfer ascii 'curv' format.
+#'
+#' @inheritParams write.fs.curv
+#'
+#' @param coords optional, nx3 matrix of x,y,z coordinates, one row per vertex in 'data'. If `NULL`, all zeroes will be written instead.
+#'
+#' @family morphometry functions
+#'
+#' @export
+write.fs.morph.asc <- function(filepath, data, coords = NULL) {
+  if(! is.double(data)) {
+    warning("Parameter 'data' is not of type double, trying to coerce.");
+    data = as.double(data);
+  }
+  num_verts = length(data);
+  if(is.null(coords)) {
+    coords = matrix(rep(0.0, (num_verts * 3)), ncol = 3L);
+  }
+  if(nrow(coords) != length(data)) {
+    stop(sprintf("If 'coords' is given, its number of rows (%d) must match the length of the data parameter (%d).\n", ncol(coords), length(data)));
+  }
+  if(ncol(coords) != 3L) {
+    stop("Matrix 'coords' must have exactly 3 columns (x,y,z).");
+  }
+  cx = coords[,1];
+  cy = coords[,2];
+  cz = coords[,3];
+  df = data.frame('vert_index'=seq.int(0, (num_verts - 1L)), 'coord_x'=cx, 'coord_y'=cy, 'coord_z'=cz, 'morph_data'=data);
+  write.table(df, file = filepath, quote = FALSE, row.names = FALSE, col.names = FALSE);
+}
+
+
+#' @title Write curv data to file in simple text format
+#'
+#' @description Write vertex-wise brain surface data to a file in a simple text format: one value per line.
+#'
+#' @inheritParams write.fs.curv
+#'
+#' @family morphometry functions
+#'
+#' @export
+write.fs.morph.txt <- function(filepath, data) {
+  if(! is.double(data)) {
+    warning("Parameter 'data' is not of type double, trying to coerce.");
+    data = as.double(data);
+  }
+  write.table(data, file = filepath, quote = FALSE, row.names = FALSE, col.names = FALSE);
+}
+
+
 #' @title Write 3-byte integer.
 #'
 #' @description Write a 3-byte integer to a binary file handle.
@@ -67,15 +119,15 @@ fwrite3 <- function(filehandle, data) {
 #'
 #' @param ... additional parameters to pass to \code{\link[freesurferformats]{write.fs.mgh}}. Only applicable for MGH and MGZ format output files, ignored for curv files.
 #'
-#' @return format, string. The format that was used to write the data. One of c("mgh", "mgz", "curv").
+#' @return format, string. The format that was used to write the data. One of c("auto", "mgh", "mgz", "curv", "gii").
 #'
 #' @family morphometry functions
 #'
 #' @export
 write.fs.morph <- function(filepath, data, format='auto', ...) {
 
-    if(! format %in% c("auto", "mgh", "mgz", "curv")) {
-      stop("Format must be one of 'auto', 'mgh', 'mgz', or 'curv'.");
+    if(! format %in% c("auto", "mgh", "mgz", "curv", "gii", "smp")) {
+      stop("Format must be one of 'auto', 'mgh', 'mgz', 'curv', 'smp', or 'gii'.");
     }
 
     if(format == 'auto') {
@@ -119,7 +171,7 @@ write.fs.morph.gii <- function(filepath, data) {
 #'
 #' @param filepath, string. A path to a file.
 #'
-#' @return format, string. The format, one of c("mgz", "mgh", "curv", "gii").
+#' @return format, string. The format, one of c("mgz", "mgh", "curv", "gii", "smp").
 #'
 #' @family morphometry functions
 #'
@@ -134,6 +186,9 @@ fs.get.morph.file.format.from.filename <- function(filepath) {
         }
         if(tolower(ext) == "mgz") {
             return("mgz");
+        }
+        if(tolower(ext) == "smp") {
+          return("smp");
         }
         if(tolower(ext) == "gii") {
           return("gii");
@@ -178,5 +233,24 @@ fs.get.morph.file.ext.for.format <- function(format) {
     } else {
         stop(sprintf("Unsupported morphometry file format: '%s'.", format));
     }
+}
+
+
+#' @title Write morphometry data in Brainvoyager SMP format.
+#'
+#' @param filepath string, the full path of the output SMP file.
+#'
+#' @param data numerical vector, the data to write. Will be coerced to double.
+#'
+#' @param ... extra arguments passed to \code{\link{write.smp.brainvoyager}}. Allows yout to save in specific format versions.
+#'
+#' @return format, string. The format that was used to write the data.
+#'
+#' @family morphometry functions
+#'
+#' @export
+write.fs.morph.smp <- function(filepath, data, ...) {
+  write.smp.brainvoyager(filepath, bvsmp(data), ...);
+  return(invisible("smp"));
 }
 

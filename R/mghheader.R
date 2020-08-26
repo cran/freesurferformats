@@ -10,6 +10,8 @@
 #'
 #' @family header coordinate space
 #'
+#' @seealso \code{\link{sm0to1}}
+#'
 #' @examples
 #'     brain_image = system.file("extdata", "brain.mgz",
 #'                                package = "freesurferformats",
@@ -100,6 +102,8 @@ mghheader.is.ras.valid <- function(header) {
 #'     vdh = read.fs.mgh(brain_image, with_header = TRUE);
 #'     mghheader.ras2vox(vdh$header);
 #'
+#' @seealso \code{\link{sm1to0}}
+#'
 #' @export
 mghheader.ras2vox <- function(header) {
 
@@ -133,6 +137,8 @@ mghheader.ras2vox <- function(header) {
 #'                                mustWork = TRUE);
 #'     vdh = read.fs.mgh(brain_image, with_header = TRUE);
 #'     mghheader.vox2ras.tkreg(vdh$header);
+#'
+#' @seealso \code{\link{sm0to1}}
 #'
 #' @export
 mghheader.vox2ras.tkreg <- function(header) {
@@ -180,6 +186,8 @@ mghheader.vox2ras.tkreg <- function(header) {
 #'                                mustWork = TRUE);
 #'     vdh = read.fs.mgh(brain_image, with_header = TRUE);
 #'     mghheader.ras2vox.tkreg(vdh$header);
+#'
+#' @seealso \code{\link{sm1to0}}
 #'
 #' @export
 mghheader.ras2vox.tkreg <- function(header) {
@@ -386,6 +394,7 @@ mghheader <- function(dims, mri_dtype_code) {
   }
 
   dtype_name = translate.mri.dtype(mri_dtype_code); # The function is (ab)used to check the passed value, the return value is not used.
+  dtype_name = NULL; # avoid IDE warnings about unused var.
 
   header = list();
   header$internal = list();
@@ -510,3 +519,40 @@ mghheader.centervoxelRAS.from.firstvoxelRAS <- function(header, first_voxel_RAS)
   center_voxel_RAS = incomplete_vox2ras %*% center_voxel_CRS;
   return(center_voxel_RAS[1:3]);
 }
+
+
+#' @title Adapt spatial transformation matrix for 1-based indices.
+#'
+#' @param tf_matrix 4x4 numerical matrix, the input spatial transformation matrix, suitable for 0-based indices. Typically this is a vox2ras matrix obtained from functions like \code{\link{mghheader.vox2ras}}.
+#'
+#' @return 4x4 numerical matrix, adapted spatial transformation matrix, suitable for 1-based indices.
+#'
+#' @family header coordinate space
+#'
+#' @seealso \code{\link{sm1to0}} for the inverse operation
+#'
+#' @export
+sm0to1 <- function(tf_matrix) {
+  q = matrix(rep(0, 16L), ncol = 4L);
+  q[1:3,4] = 1;
+  return(solve(solve(tf_matrix + q)));
+}
+
+
+#' @title Adapt spatial transformation matrix for 0-based indices.
+#'
+#' @param tf_matrix 4x4 numerical matrix, the input spatial transformation matrix, suitable for 1-based indices.
+#'
+#' @return 4x4 numerical matrix, adapted spatial transformation matrix, suitable for 0-based indices.
+#'
+#' @family header coordinate space
+#'
+#' @seealso \code{\link{sm0to1}} for the inverse operation
+#'
+#' @export
+sm1to0 <- function(tf_matrix) {
+  q = matrix(rep(0, 16L), ncol = 4L);
+  q[1:3,4] = -1;
+  return(solve(solve(tf_matrix + q)));
+}
+
