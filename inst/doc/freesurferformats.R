@@ -101,6 +101,13 @@
     f2 = surf$faces[face_index,];
     cat(sprintf("Face %d consistes of the vertices %d, %d, and %d.\n", face_index, f2[1], f2[2], f2[3]));
 
+## ---- eval = FALSE------------------------------------------------------------
+#  pmesh = read.fs.surface("~/path/to/mesh.ply");
+#  my_mesh3d = rgl::tmesh3d(c(t(pmesh$vertices)), c(t(pmesh$faces)), homogeneous=FALSE);
+
+## ---- eval = FALSE------------------------------------------------------------
+#  curv = Rvcg::vcgCurve(my_mesh3d);
+
 ## -----------------------------------------------------------------------------
     labelfile = system.file("extdata", "lh.entorhinal_exvivo.label", package = "freesurferformats", mustWork = TRUE);
     label = read.fs.label(labelfile);

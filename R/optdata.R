@@ -31,7 +31,9 @@ download_opt_data <- function() {
                                   c(base_path_subject1, 'label', 'lh.aparc.a2005s.annot'),
                                   c(base_path_subject1, 'label', 'rh.aparc.a2005s.annot'),
                                   c(base_path_subject1, 'ext', 'lh.cortex.patch.3d'),
-                                  c(base_path_subject1, 'ext', 'lh.cortex.patch.3d.asc')
+                                  c(base_path_subject1, 'ext', 'lh.cortex.patch.3d.asc'),
+                                  c(base_path_subject1, 'surf', 'lh.thickness.nii.gz')
+
   );
 
   base_path_cifti = c('cifti');
@@ -40,7 +42,11 @@ download_opt_data <- function() {
                                c(base_path_cifti, 'Conte69.MyelinAndCorrThickness.32k_fs_LR.dscalar.nii')
                           );
 
-  local_filenames = c(local_filenames_subject1, local_filenames_cifti);
+
+  base_path_nifti2 = c('nifti2');
+  local_filenames_nifti2 = list(c(base_path_nifti2, 'avg152T1_LR_nifti2.nii.gz'));
+
+  local_filenames = c(local_filenames_subject1, local_filenames_cifti, local_filenames_nifti2);
 
 
   md5sums_subject1 = c('099e738654aedc71cd580256f4f3914b',
@@ -63,7 +69,8 @@ download_opt_data <- function() {
                        '718c140022bf14a33b2ea6d6e04686a5',
                        '6c845df28caa47e362ab0ec784fb64e9',
                        '66abb5e91095754d01bcb3f445494141', # lh.cortex.patch.3d
-                       '47b92cb02f4b080b5602fef8d327e37d'
+                       '47b92cb02f4b080b5602fef8d327e37d',
+                       '27cdad54c091cb0ada615f5ac0b780b9'  # lh.thickness.nii.gz
   );
 
   md5sums_cifti = c('5aa64e146839f0332b5744d0a6e7f737',
@@ -71,7 +78,9 @@ download_opt_data <- function() {
                     '66feaa6d0b5dabc448c8557426c8dbbb'
   );
 
-  md5sums = c(md5sums_subject1, md5sums_cifti);
+  md5sums_nifti2 = '87524a733b65186a458fe2fc4a18041a';
+
+  md5sums = c(md5sums_subject1, md5sums_cifti, md5sums_nifti2);
 
   ext_url_subject_part_subject1 = 'subjects_dir/subject1/';
   ext_url_parts_each_subject = c('label/lh.aparc.a2009s.annot',
@@ -94,7 +103,8 @@ download_opt_data <- function() {
                                  'label/lh.aparc.a2005s.annot',
                                  'label/rh.aparc.a2005s.annot',
                                  'ext/lh.cortex.patch.3d',
-                                 'ext/lh.cortex.patch.3d.asc'
+                                 'ext/lh.cortex.patch.3d.asc',
+                                 'surf/lh.thickness.nii.gz'
   );
   ext_urls_subject1 = paste(ext_url_subject_part_subject1, ext_url_parts_each_subject, sep='');
 
@@ -103,11 +113,13 @@ download_opt_data <- function() {
                      'cifti/Conte69.MyelinAndCorrThickness.32k_fs_LR.dscalar.nii'
                      );
 
+  ext_urls_niftiv2 = 'nifti2/avg152T1_LR_nifti2.nii.gz';
 
-  ext_urls = c(ext_urls_subject1, ext_urls_cifti);
+  ext_urls_internal_data = c(ext_urls_subject1, ext_urls_cifti, ext_urls_niftiv2);
+  base_url_internal_data = 'http://rcmd.org/projects/nitestdata/'; # here 'internal' means data stored on our own rcmd.org server.
+  internal_data_urls = paste(base_url_internal_data, ext_urls_internal_data, sep='');
 
-  base_url = 'http://rcmd.org/projects/nitestdata/';
-  urls = paste(base_url, ext_urls, sep='');
+  urls = c(internal_data_urls);
 
   cfiles = pkgfilecache::ensure_files_available(pkg_info, local_filenames, urls, md5sums=md5sums);
   cfiles$file_status = NULL; # not exposed to end user

@@ -38,8 +38,7 @@ test_that("Our demo morphometry data GIFTI file can be read using read.fs.morph"
 
 test_that("Invalid arguments to read.fs.curv lead to errors", {
   filepath = tempfile(fileext=".curv");
-  expect_error(read.fs.curv(tmp_file, format = "invalid")); # invalid format
-  expect_error(read.fs.morph(tmp_file, format = "invalid")); # invalid format
+  expect_error(read.fs.curv(filepath, format = "invalid")); # invalid format
+  expect_error(read.fs.morph(filepath, format = "invalid")); # invalid format
 })
-
 

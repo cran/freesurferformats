@@ -263,8 +263,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <pre><code>## Region 'bankssts' has 1722 vertices and a mean cortical thickness of 2.485596 mm.</code></pre>
 <p>That’s all the information you can get from an annotation file.</p>
 </div>
-<div id="reading-surface-files" class="section level2">
-<h2>Reading surface files</h2>
+<div id="reading-surface-files-meshes" class="section level2">
+<h2>Reading surface files (meshes)</h2>
 <p>A surface file contains a brain surface mesh, i.e., a list of vertices and a list of faces. A vertex is defined by its three x,y,z coordinates, which are doubles. A face is defined by three vertex indices. Example files are <code>surf/lh.white</code> or <code>surf/rh.pial</code>.</p>
 <p>Let’s read an tiny example surface file that comes with this package:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    surface_file =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;lh.tinysurface&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;freesurferformats&quot;</span>, <span class="dt">mustWork =</span> <span class="ot">TRUE</span>);
@@ -282,6 +282,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <span class="kw">cat</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Face %d consistes of the vertices %d, %d, and %d.</span><span class="ch">\n</span><span class="st">&quot;</span>, face_index, f2[<span class="dv">1</span>], f2[<span class="dv">2</span>], f2[<span class="dv">3</span>]));</code></pre></div>
 <pre><code>## Face 2 consistes of the vertices 2, 4, and 5.</code></pre>
 <p>Note that the vertex indices start with 1 in GNU R. The vertex indices in the file are 0-based, but this is handled transparently by the ‘read.fs.surface’ and ‘write.fs.surface’ functions.</p>
+<div id="reading-arbitrary-triangular-meshes-and-converting-to-rgl-mesh3d" class="section level3">
+<h3>Reading arbitrary triangular meshes and converting to rgl mesh3d</h3>
+<p>Note that freesurferformats supports not only FreeSurfer meshes, but also a range of standard mesh file formats. You can use the <code>read.fs.surface()</code> function to read meshes in formats like Wavefront Object Format (<code>obj</code>), Stanford Triangle Format (<code>PLY</code>), Object File Format (<code>OFF</code>), and many more. Many mesh packages in R use the <code>mesh3d</code> datastructure from the <code>rgl</code> package to store or manipulate meshes, so it is useful to know how to covert our <code>fs.surface</code> mesh instance into a <code>mesh3d</code> instance. Here we show how to load a mesh and transform in to a <code>tmesh3d</code> instance (requires the <code>rgl</code> package):</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pmesh =<span class="st"> </span><span class="kw">read.fs.surface</span>(<span class="st">&quot;~/path/to/mesh.ply&quot;</span>);
+my_mesh3d =<span class="st"> </span>rgl<span class="op">::</span><span class="kw">tmesh3d</span>(<span class="kw">c</span>(<span class="kw">t</span>(pmesh<span class="op">$</span>vertices)), <span class="kw">c</span>(<span class="kw">t</span>(pmesh<span class="op">$</span>faces)), <span class="dt">homogeneous=</span><span class="ot">FALSE</span>);</code></pre></div>
+<p>One can now use this mesh in <code>rgl</code> or other packages like <code>Rvcg</code> that use the mesh3d datastructure. Here we compute the curvature of the mesh using the <code>Rvcg</code> package:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">curv =<span class="st"> </span>Rvcg<span class="op">::</span><span class="kw">vcgCurve</span>(my_mesh3d);</code></pre></div>
+</div>
 </div>
 <div id="reading-labels" class="section level2">
 <h2>Reading labels</h2>
