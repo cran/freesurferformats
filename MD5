@@ -1,6 +1,6 @@
-f3b08b4e197eacfc5c4ca777145f5e10 *DESCRIPTION
-e031a1063808baaabca84863c4685b3d *LICENSE
-4308ac492541d88ccb734f793ab086b0 *NAMESPACE
+d55aa3e93932ef418046b80f43ef61cc *DESCRIPTION
+df3e97686c2d7b4574d33a830e80b6ad *LICENSE
+f783ee50cb11bac00b9e8a2bf1452780 *NAMESPACE
 b848503b07d94743b4dc2d9d516e6d39 *R/brainvoyager.R
 775d626d39126caf9c10e09f9fde7afa *R/cifti.R
 ad2f6e7c353868896a14c40bc657def9 *R/gifti_writer.R
@@ -10,6 +10,8 @@ ec19b88621e703de4c3b219a4d732ca6 *R/mghheader.R
 6809f7c05250be2fcb756514b4f8bb71 *R/nifti_common.R
 b91fdfa9dae662b65051212e55302b28 *R/nifti_to_mgh.R
 faf503c9384b16bad8b806d5a5770d91 *R/optdata.R
+bca0908a30463739ee865ff3d4b761f6 *R/read_dti_tck.R
+3682694ae50e3333484e4d7661fefb72 *R/read_dti_trk.R
 bc257a8367db3c5d09eae2c66cf9e3e0 *R/read_fs_annot.R
 a29de65fe0007c1b9e5440c0407560e1 *R/read_fs_curv.R
 e32ecb8aae55ac85f1ad76f7aa1894be *R/read_fs_label.R
@@ -35,13 +37,13 @@ c35ea9e4be75981c3d938b5cf7b9173e *R/write_nifti2.R
 5b696950621f7f08e8ca9773330555ad *build/vignette.rds
 d26bb018b114a27e8ff330ad9663280c *inst/doc/freesurferformats.R
 bf4a4a275a9ce406155b084a385bb599 *inst/doc/freesurferformats.Rmd
-25dade6bb0fc77a313024e4491a97e45 *inst/doc/freesurferformats.html
+31e980d2aa2b886cfbb209ca8613c8dc *inst/doc/freesurferformats.html
 5dcc122807c07b25cd5bc1235752a2e3 *inst/doc/freesurferformats_header.R
 ac828ace378394fec2c62702ceea9ae8 *inst/doc/freesurferformats_header.Rmd
 14b1449c298f353983df2dac9b6b6c39 *inst/doc/freesurferformats_header.html
 164a240625bbfc855dbc65ff54cf9146 *inst/doc/freesurferformats_write.R
 fb91b826e5af8aa033277ca0d48ff278 *inst/doc/freesurferformats_write.Rmd
-d07acfbde9162d548b64ae29e6c46098 *inst/doc/freesurferformats_write.html
+64264de5cddaf893bf9519401cba49e2 *inst/doc/freesurferformats_write.html
 2c4874576eb935bf9445dda0529774e0 *inst/extdata/brain.mgz
 fe54e894472cdf4978186c910c57486d *inst/extdata/colorlut.txt
 1c9d305d69f00cea65480b1c88945522 *inst/extdata/cube.geo
@@ -94,6 +96,7 @@ f3b9cfa17d22d7a5b327757bb7072809 *man/fs.get.morph.file.ext.for.format.Rd
 46b5eb0ec4aa21646e5c6e0862b019ed *man/fs.get.morph.file.format.from.filename.Rd
 8c6108ec81b98b2817e9418fd9702678 *man/fs.patch.Rd
 ed061ae957899a9b19a0ed73a5f72a8d *man/fwrite3.Rd
+bc96b7f129686b68da8d6d52ffd3f1c4 *man/get.dti.trk.endianness.Rd
 1e31122afdc74a0766cefa16bdfbc06d *man/get.slice.orientation.Rd
 6f0dab7601c94ded4aa8ea7617838baa *man/get_opt_data_filepath.Rd
 18481e3f13eec66f27205f13a1dd8c41 *man/gifti_writer.Rd
@@ -154,6 +157,9 @@ eaeaca4fe778b2c6aab4d57c8d962858 *man/print.fs.label.Rd
 5bdcfad73928dd7c94484070a4bd15dc *man/print.fs.volume.Rd
 ce976287a67f8f20b650f18d31417bdc *man/ras.to.surfaceras.Rd
 229d5e1cdd39bf075b597db629eceeaf *man/ras.to.talairachras.Rd
+4e9e9050c293762d6faf6c2c82630523 *man/read.dti.tck.Rd
+fe11c5e75ee5bf69754109296361ad35 *man/read.dti.trk.Rd
+c50772a2c66cfc8974f8375474145bb1 *man/read.dti.tsf.Rd
 4bc4509cf1e0c5b8c297b40aed2575ce *man/read.element.counts.ply.header.Rd
 496c1f54cf2231308fb16c55d459eca8 *man/read.fixed.char.binary.Rd
 d6a31c0e069f898f3ca67b52342bee64 *man/read.fs.annot.Rd
@@ -269,6 +275,7 @@ a7f5eab9385a42d3692e2c853409829d *man/xml_node_gifti_coordtransform.Rd
 16cd0f884186db29af2445fc62f8662a *man/xml_node_gifti_label_table_from_annot.Rd
 c4cfe15697044b1bca0832ac2e6cfe2a *tests/testthat.R
 e9c48722be51c7a1d5218d1a7f047fe4 *tests/testthat/helper-functions-for-tests.R
+4fed85ac2721168fa7a98d64adcf9b7c *tests/testthat/teardown-cran.R
 78648c6e297d2c6ebf63a11e3b4efe8c *tests/testthat/test-brainvoyager.R
 ebea0e0fae190d4544c33d40cfc7fde9 *tests/testthat/test-cifti.R
 db70228bccb510ca60b21c2030ff06ce *tests/testthat/test-gifti_writer.R
