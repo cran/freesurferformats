@@ -304,6 +304,9 @@ read.fs.surface <- function(filepath, format='auto') {
 
   ret_list = list();
 
+  #cur_pos = seek(fh, where=NA);
+  #cat(sprintf("At position %d before reading anything.\n", cur_pos));
+
   magic_byte = fread3(fh);
   if (magic_byte == OLD_QUAD_MAGIC_FILE_TYPE_NUMBER | magic_byte == NEW_QUAD_MAGIC_FILE_TYPE_NUMBER) {
     warning("Reading QUAD files in untested atm. Please use with care. This warning will be removed once we have an example input file and the code has unit tests.")
@@ -1416,3 +1419,19 @@ int.to.col.brainvoyager <- function(int_val) {
   return(grDevices::rgb(r/255., g/255., b/255.));
 }
 
+
+#' @title Stop unless surf is an fs.surface
+#'
+#' @param surf fs.surface instance or anything else
+#'
+#' @param param_name character string, used in stop message to identify the parameter.
+#'
+#' @return Called for the side effect of stopping if surf is not an fs.surface instance.
+#'
+#' @keywords internal
+assert.surface <- function(surface, param_name="surface") {
+  if(! is.fs.surface(surface)) {
+    stop(sprintf("Parameter '%s' must be an fs.surface instance.", param_name));
+  }
+  return(invisible(NULL));
+}

@@ -32,6 +32,8 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
     }
     on.exit({ close(fh) }, add=TRUE);
 
+    empty_label_name = "unknown";
+
     num_verts_and_labels = readBin(fh, integer(), n = 1, endian = "big");
     verts_and_labels = readBin(fh, integer(), n = num_verts_and_labels*2, endian = "big");
 
@@ -71,6 +73,7 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
         hex_color_string_rgba = grDevices::rgb(r/255., g/255., b/255., a/255);
         colortable_df = data.frame(struct_names, r, g, b, a, code, hex_color_string_rgb, hex_color_string_rgba, stringsAsFactors = FALSE);
         colnames(colortable_df) = c("struct_name", "r", "g", "b", "a", "code", "hex_color_string_rgb", "hex_color_string_rgba");
+        colortable_df$struct_index = colortable$struct_index;
         return_list$colortable_df = colortable_df;
 
         label_names = rep("", length(labels))
@@ -79,6 +82,11 @@ read.fs.annot <- function(filepath, empty_label_name="unknown", metadata=list())
         for (i in 1:length(colortable$struct_names)) {
           label_code = code[i];
           label_name = colortable$struct_names[i];
+          if(nchar(label_name) == 0) {
+            warning(sprintf("Replacing empty label name with '%s'\n", empty_label_name));
+            label_name = paste(empty_label_name, nempty, sep="");
+            nempty = nempty + 1L;
+          }
           hex_color_string_rgb = grDevices::rgb(colortable$table[i,1]/255., colortable$table[i,2]/255., colortable$table[i,3]/255.);
           label_names[labels==label_code] = label_name;
           hex_colors_rgb[labels==label_code] = hex_color_string_rgb;
@@ -105,7 +113,11 @@ print.fs.annot <- function(x, ...) { # nocov start
   } else {
     cat(sprintf("Brain surface annotation assigning %d vertices to %d brain regions.\n", length(x$vertices), nrow(x$colortable_df)));
     for(region_idx in seq_len(nrow(x$colortable_df))) {
-      cat(sprintf(" - region #%d '%s': size %d vertices\n", region_idx, as.character(x$colortable_df$struct_name[[region_idx]]), sum(x$label_codes == x$colortable_df$code[[region_idx]])));
+      struct_index = region_idx;
+      if(! is.null(x$colortable_df$struct_index)) {
+        struct_index = x$colortable_df$struct_index[region_idx];
+      }
+      cat(sprintf(" - region #%d '%s': size %d vertices\n", struct_index, as.character(x$colortable_df$struct_name[[region_idx]]), sum(x$label_codes == x$colortable_df$code[[region_idx]])));
     }
   }
 } # nocov end
@@ -196,12 +208,15 @@ readcolortable <- function(fh, ctable_num_entries) {
       warning(sprintf("Meta data on number of color table mismatches: %d versus %d.\n", ctable_num_entries, ctable_num_entries_2nd));   # nocov
     }
 
+    struct_identifier = rep(NA, ctable_num_entries); # the IDs of the regions in the file.
     for (i in seq_len(ctable_num_entries)) {
-        struct_idx = readBin(fh, integer(), n = 1, endian = "big") + 1L;
+        struct_idx = i; # our internal index
+        current_struct_identifier = readBin(fh, integer(), n = 1, endian = "big"); # the region identifier field in the file.
+        struct_identifier[struct_idx] = current_struct_identifier;
 
         # Index must not be negative:
-        if (struct_idx < 0L) {
-            stop(sprintf("Invalid struct index in color table entry #%d: index must not be negative but is '%d'.\n", i, struct_idx));   # nocov
+        if (current_struct_identifier < 0L) {
+            stop(sprintf("Invalid struct index in color table entry #%d: index must not be negative but is '%d'.\n", i, current_struct_identifier));   # nocov
         }
 
         name_so_far = colortable$struct_names[struct_idx];
@@ -226,6 +241,7 @@ readcolortable <- function(fh, ctable_num_entries) {
         colortable$table[i,3] = b;
         colortable$table[i,4] = a;
         colortable$table[i,5] = unique_color_label;
+        colortable$struct_index = struct_identifier;
     }
 
     return(colortable);
@@ -558,4 +574,88 @@ read.fs.gca <- function(filepath) {
 }
 
 
+#' @title Get max region index of an fs.annot instance.
+#'
+#' @param annot fs.annot instance
+#'
+#' @return integer, the max region index. They typically start with 0 and are consecutive, but this is not enforced or checked in any way.
+#'
+#' @note This is a helper function to be used with \code{annot.unique}, see the example there.
+#'
+#' @export
+annot.max.region.idx <- function(annot) {
+  if(is.null(annot$colortable_df$struct_index)) {
+    return(nrow(annot$colortable_df));
+  } else {
+    return(max(annot$colortable_df$struct_index));
+  }
+}
 
+
+
+
+# lh_annot = read.fs.annot("~/data/tim_only/tim/label/lh.aparc.annot");
+# rh_annot = read.fs.annot("~/data/tim_only/tim/label/rh.aparc.annot");
+# rh_annot_mod = annot.unique(...
+# write.fs.annot("~/test.annot", annot=rh_annot_mod);
+# To test whether the annot is valid and freesurfer can read it, try converting with mris_convert:
+# $ mris_convert --annot ~/test.annot data/tim_only/tim/surf/rh.white rh.aparc.gii
+
+#' @title Make the region names and indices unique across hemispheres for a parcellation.
+#'
+#' @description Sometimes you need an annotation to use unique IDs and region names across hemispheres, but that is not the case for the standard FreeSurfer parcellations. So what you need to do is change the codes and names for one hemi. Typically the left hemi annot will be left as is, and the right hemi annot will be modified using this function.
+#'
+#' @param annot the annot in which to change the ids and names.
+#'
+#' @param add_to_region_indices integer, a single value to add to the region indices. This is typically equal to the number of regions in the left hemisphere plus one (e.g., 36+1=37 for the 'aparc' atlas), as the region indices typically start at 0 and are consecutive, but you may want to check the maximal region id of the left hemi is in doubt. Pass \code{0} to leave the IDs intact.
+#'
+#' @param region_name_prefix character string, a prefix to modify the region names to make them unique. Pass `NULL` if you do not want a prefix.
+#'
+#' @param region_name_suffix character string, a suffix to modify the region names to make them unique.  Pass `NULL` if you do not want a suffix.
+#'
+#' @param set_first_idx_zero logical, whether to apply special treatment to first region (the 'unknown' region) in annot and set its ID to \code{0}.
+#'
+#' @examples
+#' \dontrun{
+#' lh_annot = read.fs.annot("~/data/study1/subject1/label/lh.aparc.annot");
+#' lh_annot; # shows info including region IDs
+#' rh_annot = read.fs.annot("~/data/study1/subject1/label/rh.aparc.annot");
+#' rh_annot_mod = annot.unique(rh_annot, annot.max.region.idx(lh_annot)+1L, region_name_prefix='rh_');
+#' }
+#'
+#' @note This function is not part of the official API and should not be used. It is currently broken.
+#'
+#' @keywords internal
+annot.unique <- function(annot, add_to_region_indices, region_name_prefix="rh_", region_name_suffix=NULL, set_first_idx_zero=FALSE) {
+  if(! is.fs.annot(annot)) {
+    stop("Parameter 'annot' must be an fs.annot instance.");
+  }
+  if(! is.integer(add_to_region_indices)) {
+    stop("Parameter 'add_to_region_indices' must be of type integer.");
+  }
+
+  ### Adapt region indices. ###
+  # First make sure there is a struct index in the colortable, add if not.
+  if(is.null(annot$colortable_df$struct_index)) {
+    annot$colortable_df$struct_index = seq(0, nrow(annot$colortable_df) - 1) + 1L;
+  }
+  # Now modify the struct_index as requested.
+  annot$colortable_df$struct_index = annot$colortable_df$struct_index + add_to_region_indices;
+  if(set_first_idx_zero) {
+    annot$colortable_df$struct_index[1] = 0L;
+  }
+  annot$colortable$struct_index = annot$colortable_df$struct_index;
+
+  ### Add prefix/suffix to names. ###
+  if(! is.null(region_name_prefix)) {
+    annot$label_names = paste(region_name_prefix, annot$label_names, sep = "");
+    annot$colortable$struct_names = paste(region_name_prefix, annot$colortable$struct_names, sep = "");
+    annot$colortable_df$struct_name = paste(region_name_prefix, annot$colortable_df$struct_name, sep = "");
+  }
+  if(! is.null(region_name_suffix)) {
+    annot$label_names = paste(annot$label_names, region_name_suffix, sep = "");
+    annot$colortable$struct_names = paste(annot$colortable$struct_names, region_name_suffix, sep = "");
+    annot$colortable_df$struct_name = paste(annot$colortable_df$struct_name, region_name_suffix, sep = "");
+  }
+  return(annot);
+}
