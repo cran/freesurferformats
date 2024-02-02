@@ -4,14 +4,12 @@
 \alias{check.dtype.for.data}
 \title{Check whether the dtype is suitable for the data.}
 \usage{
-check.dtype.for.data(data, mri_dtype_code)
+check.dtype.for.data(mridata, mri_dtype_code)
 }
 \arguments{
-\item{data}{the data to check, a vector, matrix or array typically}
+\item{mridata}{the data to check, a vector, matrix or array typically}
 
 \item{mri_dtype_code}{integer, the MRI data type code. See \code{\link[freesurferformats]{translate.mri.dtype}}.}
-
-\item{silent}{logical, whether to suppress warning messages if the dtype seems unsuitable}
 }
 \value{
 logical, whether the dtype could be suitable. This is only a guess, as the checks are in no way complete.
