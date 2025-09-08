@@ -9,12 +9,12 @@
     brain = brain_with_hdr$data;   # as seen before, this is what we got in the last example (the data).
     header = brain_with_hdr$header;   # the header
 
-## ---- eval = FALSE------------------------------------------------------------
-#      header$dtype           # int, one of: 0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT
-#      header$ras_good_flag   # int, 0 or 1. Whether the file contains a valid vox2ras matrix and ras_xform (see header$vox2ras_matrix below)
-#      header$has_mr_params   # int, 0 or 1. Whether the file contains mr_params (see header$mr_params below)
-#      header$voldim          # integer vector or length 4. The volume (=data) dimensions. E.g., c(256, 256, 256, 1) for 3D data.
-#  
+## ----eval = FALSE-------------------------------------------------------------
+#     header$dtype           # int, one of: 0=MRI_UCHAR; 1=MRI_INT; 3=MRI_FLOAT; 4=MRI_SHORT
+#     header$ras_good_flag   # int, 0 or 1. Whether the file contains a valid vox2ras matrix and ras_xform (see header$vox2ras_matrix below)
+#     header$has_mr_params   # int, 0 or 1. Whether the file contains mr_params (see header$mr_params below)
+#     header$voldim          # integer vector or length 4. The volume (=data) dimensions. E.g., c(256, 256, 256, 1) for 3D data.
+# 
 
 ## -----------------------------------------------------------------------------
     if(header$has_mr_params) {
@@ -32,12 +32,12 @@
         print(header$ras_xform);
     }
 
-## ---- eval = FALSE------------------------------------------------------------
-#      mgh_file = system.file("mystudy", "subject1", "surf", "lh.thickness.fwhm25.fsaverage.mgh")
-#      cortical_thickness_standard = read.fs.mgh(mgh_file)
+## ----eval = FALSE-------------------------------------------------------------
+#     mgh_file = system.file("mystudy", "subject1", "surf", "lh.thickness.fwhm25.fsaverage.mgh")
+#     cortical_thickness_standard = read.fs.mgh(mgh_file)
 
-## ---- eval = FALSE------------------------------------------------------------
-#      oro.nifti::orthographic(oro.nifti::nifti(brain))
+## ----eval = FALSE-------------------------------------------------------------
+#     oro.nifti::orthographic(oro.nifti::nifti(brain))
 
 ## -----------------------------------------------------------------------------
     library("freesurferformats")
@@ -101,12 +101,12 @@
     f2 = surf$faces[face_index,];
     cat(sprintf("Face %d consistes of the vertices %d, %d, and %d.\n", face_index, f2[1], f2[2], f2[3]));
 
-## ---- eval = FALSE------------------------------------------------------------
-#  pmesh = read.fs.surface("~/path/to/mesh.ply");
-#  my_mesh3d = rgl::tmesh3d(c(t(pmesh$vertices)), c(t(pmesh$faces)), homogeneous=FALSE);
+## ----eval = FALSE-------------------------------------------------------------
+# pmesh = read.fs.surface("~/path/to/mesh.ply");
+# my_mesh3d = rgl::tmesh3d(c(t(pmesh$vertices)), c(t(pmesh$faces)), homogeneous=FALSE);
 
-## ---- eval = FALSE------------------------------------------------------------
-#  curv = Rvcg::vcgCurve(my_mesh3d);
+## ----eval = FALSE-------------------------------------------------------------
+# curv = Rvcg::vcgCurve(my_mesh3d);
 
 ## -----------------------------------------------------------------------------
     labelfile = system.file("extdata", "lh.entorhinal_exvivo.label", package = "freesurferformats", mustWork = TRUE);

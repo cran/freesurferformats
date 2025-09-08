@@ -1469,7 +1469,7 @@ int.to.col.brainvoyager <- function(int_val) {
 #'
 #' @param param_name character string, used in stop message to identify the parameter.
 #'
-#' @return Called for the side effect of stopping if surface is not an fs.surface instance.
+#' @return Called for the side effect of stopping if surf is not an fs.surface instance.
 #'
 #' @keywords internal
 assert.surface <- function(surface, param_name="surface") {

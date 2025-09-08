@@ -141,8 +141,7 @@ read.fs.morph.txt <- function(filepath) {
 #'
 #' @param filehandle file handle
 #'
-#' @return integer, The read integer.
-#'
+#' @return integer: The read integer.
 #'
 #' @keywords internal
 fread3 <- function(filehandle) {
@@ -158,7 +157,7 @@ fread3 <- function(filehandle) {
 #'
 #' @description Read vertex-wise brain surface data from a file. The file can be in any of the supported formats, and the format will be determined from the file extension.
 #'
-#' @param filepath, string. Full path to the input file. The suffix determines the expected format as follows: ".mgz" and ".mgh" will be read with the read.fs.mgh function, all other file extensions will be read with the read.fs.curv function.
+#' @param filepath string. Full path to the input file. The suffix determines the expected format as follows: ".mgz" and ".mgh" will be read with the read.fs.mgh function, all other file extensions will be read with the read.fs.curv function.
 #'
 #' @param format character string, the format to use. One of c("auto", "mgh", "mgz", "curv", "gii"). The default setting "auto" will determine the format from the file extension.
 #'
