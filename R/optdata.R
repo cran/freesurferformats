@@ -2,11 +2,16 @@
 #'
 #' @description Ensure that the optional data is available locally in the package cache. Will try to download the data only if it is not available. This data is not required for the package to work, but it is used in the examples, in the unit tests and also in the example code from the vignette. Downloading it is highly recommended.
 #'
+#' @param dl_from string, the source to download from. Either `"rcmd.org"` (the default) or `"github_fsf_release"` to use the GitHub release at \url{https://github.com/dfsp-spirit/freesurferformats/releases/tag/nitestdata-v1}.
+#'
+#' @param scheme string, the URL scheme to use. Either `"https"` (the default) or `"http"`. Both the rcmd.org server and GitHub support HTTPS, so this should rarely need to be changed.
+#'
 #' @return Named list. The list has entries: "available": vector of strings. The names of the files that are available in the local file cache. You can access them using get_optional_data_file(). "missing": vector of strings. The names of the files that this function was unable to retrieve.
 #'
 #' @export
 #' @importFrom pkgfilecache get_pkg_info ensure_files_available
-download_opt_data <- function() {
+download_opt_data <- function(dl_from = c("rcmd.org", "github_fsf_release"),
+                              scheme = c("https", "http")) {
   pkg_info = pkgfilecache::get_pkg_info("freesurferformats");
 
   # Replace these with your optional data files.
@@ -46,7 +51,12 @@ download_opt_data <- function() {
   base_path_nifti2 = c('nifti2');
   local_filenames_nifti2 = list(c(base_path_nifti2, 'avg152T1_LR_nifti2.nii.gz'));
 
-  local_filenames = c(local_filenames_subject1, local_filenames_cifti, local_filenames_nifti2);
+  base_path_dwi = c('dwi');
+  local_filenames_dwi = list(c(base_path_dwi, 'tracks.tck'),
+                             c(base_path_dwi, 'tracks.tsf')
+  );
+
+  local_filenames = c(local_filenames_subject1, local_filenames_cifti, local_filenames_nifti2, local_filenames_dwi);
 
 
   md5sums_subject1 = c('099e738654aedc71cd580256f4f3914b',
@@ -80,7 +90,11 @@ download_opt_data <- function() {
 
   md5sums_nifti2 = '87524a733b65186a458fe2fc4a18041a';
 
-  md5sums = c(md5sums_subject1, md5sums_cifti, md5sums_nifti2);
+  md5sums_dwi = c('7d55d826fc4b7f06c4c0c7147d85990d',
+                    '6f82d3d82bee10a64d33af7d8970db14'
+  );
+
+  md5sums = c(md5sums_subject1, md5sums_cifti, md5sums_nifti2, md5sums_dwi);
 
   ext_url_subject_part_subject1 = 'subjects_dir/subject1/';
   ext_url_parts_each_subject = c('label/lh.aparc.a2009s.annot',
@@ -115,11 +129,22 @@ download_opt_data <- function() {
 
   ext_urls_niftiv2 = 'nifti2/avg152T1_LR_nifti2.nii.gz';
 
-  ext_urls_internal_data = c(ext_urls_subject1, ext_urls_cifti, ext_urls_niftiv2);
-  base_url_internal_data = 'http://rcmd.org/projects/nitestdata/'; # here 'internal' means data stored on our own rcmd.org server.
-  internal_data_urls = paste(base_url_internal_data, ext_urls_internal_data, sep='');
+  ext_urls_dwi = c('dwi/tracks.tck',
+                    'dwi/tracks.tsf'
+  );
 
-  urls = c(internal_data_urls);
+  ext_urls_internal_data = c(ext_urls_subject1, ext_urls_cifti, ext_urls_niftiv2, ext_urls_dwi);
+
+  dl_from = match.arg(dl_from);
+  scheme = match.arg(scheme);
+  if (dl_from == "github_fsf_release") {
+    base_url_github = sprintf('%s://github.com/dfsp-spirit/freesurferformats/releases/download/nitestdata-v1/', scheme);
+    flat_names = basename(ext_urls_internal_data);
+    urls = paste(base_url_github, flat_names, sep='');
+  } else {
+    base_url_internal_data = sprintf('%s://rcmd.org/projects/nitestdata/', scheme); # here 'internal' means data stored on our own rcmd.org server.
+    urls = paste(base_url_internal_data, ext_urls_internal_data, sep='');
+  }
 
   cfiles = pkgfilecache::ensure_files_available(pkg_info, local_filenames, urls, md5sums=md5sums);
   cfiles$file_status = NULL; # not exposed to end user

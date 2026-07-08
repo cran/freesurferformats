@@ -12,7 +12,7 @@ assert.surface(surface, param_name = "surface")
 \item{param_name}{character string, used in stop message to identify the parameter.}
 }
 \value{
-Called for the side effect of stopping if surf is not an fs.surface instance.
+Called for the side effect of stopping if surface is not an fs.surface instance.
 }
 \description{
 Stop unless surf is an fs.surface

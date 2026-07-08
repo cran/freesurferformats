@@ -10,7 +10,7 @@ fread3(filehandle)
 \item{filehandle}{file handle}
 }
 \value{
-integer: The read integer.
+integer, The read integer.
 }
 \description{
 Read a 3-byte integer from a binary file handle. Advances the pointer accordingly.

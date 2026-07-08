@@ -141,7 +141,7 @@ read.fs.morph.txt <- function(filepath) {
 #'
 #' @param filehandle file handle
 #'
-#' @return integer: The read integer.
+#' @return integer, The read integer.
 #'
 #' @keywords internal
 fread3 <- function(filehandle) {
