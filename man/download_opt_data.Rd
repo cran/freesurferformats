@@ -10,13 +10,13 @@ download_opt_data(
 )
 }
 \arguments{
-\item{dl_from}{string, the source to download from. Either `"rcmd.org"` (the default) or `"github_fsf_release"` to use the GitHub release at \url{https://github.com/dfsp-spirit/freesurferformats/releases/tag/nitestdata-v1}.}
+\item{dl_from}{string, the source to download from. Either \code{"rcmd.org"} (the default) or \code{"github_fsf_release"} to use the GitHub release at \url{https://github.com/dfsp-spirit/freesurferformats/releases/tag/nitestdata-v1}.}
 
-\item{scheme}{string, the URL scheme to use. Either `"https"` (the default) or `"http"`. Both the rcmd.org server and GitHub support HTTPS, so this should rarely need to be changed.}
+\item{scheme}{string, the URL scheme to use. Either \code{"https"} (the default) or \code{"http"}. Both the rcmd.org server and GitHub support HTTPS, so this should rarely need to be changed.}
 }
 \value{
 Named list. The list has entries: "available": vector of strings. The names of the files that are available in the local file cache. You can access them using get_optional_data_file(). "missing": vector of strings. The names of the files that this function was unable to retrieve.
 }
 \description{
-Ensure that the optional data is available locally in the package cache. Will try to download the data only if it is not available. This data is not required for the package to work, but it is used in the examples, in the unit tests and also in the example code from the vignette. Downloading it is highly recommended.
+Ensure that the optional data is available locally in the package cache. Will try to download the data only if it is not available. This data is not required for the package to work, but it is used in the examples, in the unit tests and also in the example code from the vignette. Downloading it is highly recommended. The downloaded data files are owned by their respective copyright holders and are subject to their respective licenses; see the file 'inst/COPYRIGHTS' for attribution and license details.
 }
