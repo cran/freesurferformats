@@ -2,11 +2,47 @@
 % Please edit documentation in R/read_dti_tcktsf.R
 \name{.read.dti.tcktsf}
 \alias{.read.dti.tcktsf}
-\title{.read.dti.tcktsf}
+\title{Read DTI tracking data from MRtrix TCK and TSF files.}
 \usage{
-.read.dti.tcktsf(filepath)
+.read.dti.tcktsf(
+  filepath,
+  max_tracks = Inf,
+  skip_tracks = 0L,
+  bbox = NULL,
+  chunk_values = 4e+06
+)
+}
+\arguments{
+\item{filepath}{character string, path to the \code{TCK} or \code{TSF} file
+to read. Gzip-compressed files (i.e., \code{.tck.gz}) are supported and the
+compression is detected from the file content, not the file name.}
+
+\item{max_tracks}{numeric, the maximum number of tracks to read. Use
+\code{Inf} (the default) to read all tracks. This allows reading a subset
+of a very large tractogram without holding all of it in memory.}
+
+\item{skip_tracks}{integer, the number of tracks to skip before reading any.
+Skipped tracks are never held in memory.}
+
+\item{bbox}{numeric vector of length 6 or NULL. If given, only tracks that
+have at least one point inside the box are read, the box is given as
+\code{c(xmin, xmax, ymin, ymax, zmin, zmax)} in the coordinate system of
+the stored data. This has no effect for TSF files, which store no
+coordinates. The number of matching tracks cannot be known in advance, so
+for very large files this should be combined with a \code{max_tracks}
+value that is known to be safe.}
+
+\item{chunk_values}{integer, the number of payload values that are read per
+chunk. This is an advanced tuning parameter that does not change the result,
+only the peak memory usage (at most one chunk is buffered at a time) and the
+granularity of the file reads. The default of 4e6 values corresponds to
+about 32 MB of doubles. Lower it on a machine with very little free memory.}
+}
+\value{
+named list with entries \code{header} and either \code{tracks} (for
+TCK files) or \code{scalars} (for TSF files).
 }
 \description{
-.read.dti.tcktsf
+Read DTI tracking data from MRtrix TCK and TSF files.
 }
 \keyword{internal}

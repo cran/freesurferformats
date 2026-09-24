@@ -7,7 +7,7 @@
 write.fs.volume(filepath, fs_vol)
 }
 \arguments{
-\item{filepath}{string. Full path to the output file. The file extension determines the format: '.mgh' or '.mgz' for FreeSurfer MGH/MGZ format, '.nii' or '.nii.gz' for NIFTI v1 format.}
+\item{filepath}{string. Full path to the output file. The file extension determines the format: '.mgh' or '.mgz' for FreeSurfer MGH/MGZ format, '.nii' or '.nii.gz' for NIFTI v1 format, and '.hdr', '.img', '.hdr.gz' or '.img.gz' for a NIFTI v1 pair, i.e. a header file with a separate data file. A pair is written instead of a plain ANALYZE 7.5 file because ANALYZE cannot store the geometry of the volume, see \code{\link{write.analyze}} if you need real ANALYZE output.}
 
 \item{fs_vol}{an \code{fs.volume} instance, as returned by \code{\link{read.fs.volume}} with parameter \code{with_header=TRUE}.}
 }
@@ -16,6 +16,11 @@ Write brain volume data to a file. The format is determined from the file extens
 }
 \note{
 When writing NIFTI files, this function uses \code{\link{nii1header.for.mgh}} to compute a NIFTI v1 header from the MGH header information.
+
+A file name that is one of the standard CIFTI-2 names (e.g. \code{.dscalar.nii}) is an
+error: such a file has to contain the CIFTI XML metadata, so a NIFTI file with that
+name is refused by this package and misread by other software. Use
+\code{\link{write.cifti}} for CIFTI-2 files.
 }
 \examples{
 \dontrun{
@@ -26,6 +31,7 @@ mgh_file <- system.file("extdata", "brain.mgz",
 fs_vol <- read.fs.volume(mgh_file, with_header = TRUE)
 write.fs.volume(tempfile(fileext = ".mgz"), fs_vol)
 write.fs.volume(tempfile(fileext = ".nii.gz"), fs_vol)
+write.fs.volume(tempfile(fileext = ".hdr"), fs_vol)
 }
 
 }

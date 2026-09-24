@@ -26,17 +26,33 @@ mghheader.scanner2tkreg(vdh$header)
 }
 \seealso{
 Other header coordinate space:
+\code{\link[=invert.fs.transform]{invert.fs.transform()}},
+\code{\link[=is.fs.transform]{is.fs.transform()}},
 \code{\link[=mghheader.is.ras.valid]{mghheader.is.ras.valid()}},
 \code{\link[=mghheader.ras2vox]{mghheader.ras2vox()}},
 \code{\link[=mghheader.ras2vox.tkreg]{mghheader.ras2vox.tkreg()}},
 \code{\link[=mghheader.tkreg2scanner]{mghheader.tkreg2scanner()}},
 \code{\link[=mghheader.vox2ras]{mghheader.vox2ras()}},
 \code{\link[=mghheader.vox2ras.tkreg]{mghheader.vox2ras.tkreg()}},
+\code{\link[=print.fs.transform]{print.fs.transform()}},
 \code{\link[=read.fs.transform]{read.fs.transform()}},
 \code{\link[=read.fs.transform.dat]{read.fs.transform.dat()}},
+\code{\link[=read.fs.transform.fslmat]{read.fs.transform.fslmat()}},
+\code{\link[=read.fs.transform.itk]{read.fs.transform.itk()}},
 \code{\link[=read.fs.transform.lta]{read.fs.transform.lta()}},
 \code{\link[=read.fs.transform.xfm]{read.fs.transform.xfm()}},
 \code{\link[=sm0to1]{sm0to1()}},
-\code{\link[=sm1to0]{sm1to0()}}
+\code{\link[=sm1to0]{sm1to0()}},
+\code{\link[=summary.fs.transform]{summary.fs.transform()}},
+\code{\link[=transform2lps]{transform2lps()}},
+\code{\link[=transform2ras]{transform2ras()}},
+\code{\link[=transform2voxel]{transform2voxel()}},
+\code{\link[=transform2world]{transform2world()}},
+\code{\link[=write.fs.transform]{write.fs.transform()}},
+\code{\link[=write.fs.transform.dat]{write.fs.transform.dat()}},
+\code{\link[=write.fs.transform.fslmat]{write.fs.transform.fslmat()}},
+\code{\link[=write.fs.transform.itk]{write.fs.transform.itk()}},
+\code{\link[=write.fs.transform.lta]{write.fs.transform.lta()}},
+\code{\link[=write.fs.transform.xfm]{write.fs.transform.xfm()}}
 }
 \concept{header coordinate space}

@@ -15,7 +15,7 @@ read.fs.volume(
 \arguments{
 \item{filepath}{string. Full path to the input MGZ, MGH or NIFTI file.}
 
-\item{format}{character string, one one of 'auto', 'nii', 'mgh' or 'mgz'. The format to assume. If set to 'auto' (the default), the format will be derived from the file extension.}
+\item{format}{character string, one one of 'auto', 'nii', 'mgh', 'mgz', 'nrrd' or 'analyze'. The format to assume. If set to 'auto' (the default), the format will be derived from the file extension. The value 'analyze' covers the two-file image formats ANALYZE 7.5 and NIFTI v1 pair files, which share the \code{.hdr}/\code{.img} file extensions, see \code{\link{read.fs.volume.analyze}}.}
 
 \item{flatten}{logical. Whether to flatten the return volume to a 1D vector. Useful if you know that this file contains 1D morphometry data.}
 
@@ -28,6 +28,12 @@ data, multi-dimensional array. The brain imaging data, one value per voxel. The 
 }
 \description{
 Read multi-dimensional brain imaging data from a file.
+}
+\note{
+CIFTI-2 files (which are NIFTI-2 files, see \code{\link{read.cifti}}) are
+refused with an error instead of being read as volumes: their payload is a
+matrix whose dimensions the CIFTI XML metadata describes, so the values would
+come back as voxels that mean nothing.
 }
 \examples{
 brain_image <- system.file("extdata", "brain.mgz",

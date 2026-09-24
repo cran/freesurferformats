@@ -42,73 +42,6 @@ read.fs.surface.asc <- function(filepath, with_values = TRUE, header_numlines = 
 }
 
 
-#' @title Read VTK ASCII format mesh as surface.
-#'
-#' @description This reads meshes (vtk polygon datasets) from text files in VTK ASCII format. See https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf for format spec. Note that this function does **not** read arbitrary VTK datasets, i.e., it supports only a subset of the possible contents of VTK files (i.e., polygon meshes).
-#'
-#' @param filepath string. Full path to the input surface file in VTK ASCII format.
-#'
-#' @return named list. The list has the following named entries: "vertices": nx3 double matrix, where n is the number of vertices. Each row contains the x,y,z coordinates of a single vertex. "faces": nx3 integer matrix. Each row contains the vertex indices of the 3 vertices defining the face. WARNING: The indices are returned starting with index 1 (as used in GNU R). Keep in mind that you need to adjust the index (by substracting 1) to compare with data from other software.
-#'
-#' @note This is by far not a complete VTK format reader.
-#'
-#' @family mesh functions
-#'
-#' @export
-read.fs.surface.vtk <- function(filepath) {
-  all_lines <- readLines(filepath)
-  if (length(all_lines) < 5L) {
-    stop("The file is not a valid VTK ASCII file: it does not contain the 4 header lines and a data line.") # nocov
-  }
-  if (!startsWith(all_lines[1], "# vtk DataFile Version")) {
-    stop("The file is not a valid VTK ASCII file: first line is not a proper VTK file version descriptor.") # nocov
-  }
-  # line 2 is a freeform description, we do not check it
-  if (all_lines[3] != "ASCII") {
-    stop("The file is not a valid VTK ASCII file: third line does not read 'ASCII'.") # nocov
-  }
-  if (all_lines[4] != "DATASET POLYDATA") {
-    stop("The file is not a VTK ASCII mesh file: forth line does not read 'DATASET POLYDATA'. Only mesh data is supported by this function.") # nocov
-  }
-
-  # Starting from here, several data sections may follow.
-  vertices_df <- NULL
-  faces_df <- NULL
-
-  current_line_idx <- 5L
-  while (current_line_idx <= length(all_lines)) {
-    data_section_header_line_words <- strsplit(all_lines[current_line_idx], " ")[[1]]
-    data_type <- data_section_header_line_words[1]
-    num_elements <- as.integer(data_section_header_line_words[2])
-    if (data_type == "POINTS") {
-      vertices_df <- read.table(filepath, skip = current_line_idx, col.names = c("coord1", "coord2", "coord3"), colClasses = c("numeric", "numeric", "numeric"), nrows = num_elements)
-    } else if (data_type == "POLYGONS") {
-      faces_df <- read.table(filepath, skip = current_line_idx, col.names = c("num_verts", "vertex1", "vertex2", "vertex3"), colClasses = c("integer", "integer", "integer", "integer"), nrows = num_elements)
-    } else {
-      warning(sprintf("Unsupported data type in section staring at line %d: '%s'. Only 'POINTS' and 'POLYGONS' are supported. Skipping section.\n", current_line_idx, data_type)) # nocov
-    }
-    current_line_idx <- current_line_idx + num_elements + 1L # the +1L is for the section header line
-  }
-
-
-  if (is.null(vertices_df) | is.null(faces_df)) {
-    stop("VTK file did not contain a complete mesh dataset (POINTS and POLYGONS sections).") # nocov
-  }
-
-  if (any(faces_df$num_verts != 3L)) {
-    stop("The mesh in the VTK file contains POLYGONS which are not triangles. Only triangular meshes are supported by this function.") # nocov
-  }
-
-
-  ret_list <- list()
-  ret_list$vertices <- unname(data.matrix(vertices_df[1:3]))
-  ret_list$faces <- unname(data.matrix(faces_df[2:4])) + 1L # the +1 is because the surface should use R indices (one-based)
-  class(ret_list) <- c("fs.surface", class(ret_list))
-
-  return(ret_list)
-}
-
-
 #' @title Read Stanford PLY format mesh as surface.
 #'
 #' @description This reads meshes from text files in PLY format. Note that this does not read arbitrary data from PLY files, i.e., PLY files can store data that is not supported by this function.
@@ -272,7 +205,7 @@ read.fs.surface <- function(filepath, format = "auto") {
     return(read.fs.surface.mz3(filepath))
   }
 
-  if (format == "stl" | (format == "auto" & filepath.ends.with(filepath, c(".stl")))) {
+  if (format == "stl" | (format == "auto" & filepath.ends.with(filepath, c(".stl", ".stla", ".stlb")))) {
     return(read.fs.surface.stl(filepath))
   }
 
@@ -675,7 +608,7 @@ read.fs.surface.mz3 <- function(filepath) {
 #'
 #' @inheritParams read.fs.surface.stl.ascii
 #'
-#' @return an `fs.surface` instance.
+#' @return an `fs.surface` instance. The normals of the faces are available in the 'metadata' property, in the entry 'normals' (a matrix with one row per face). Note that the normal vectors stored in the file are ignored, the returned normals are computed from the geometry, see \code{\link{mesh.face.normals}}.
 #'
 #' @references See https://en.wikipedia.org/wiki/STL_(file_format) for the format spec.
 #'
@@ -699,7 +632,6 @@ read.fs.surface.stl.bin <- function(filepath, digits = 6L) {
 
   # cat(sprintf("Reading %d faces from binary STL file.\n", num_faces));
 
-  all_normals <- NULL
   all_vertex_coords <- NULL
   all_attr_counts <- NULL
 
@@ -710,11 +642,6 @@ read.fs.surface.stl.bin <- function(filepath, digits = 6L) {
     attr_count <- readBin(fh, integer(), size = 2, n = 1L, signed = FALSE, endian = "little")
     all_attr_counts <- c(all_attr_counts, attr_count)
 
-    if (is.null(all_normals)) {
-      all_normals <- face_normal
-    } else {
-      all_normals <- rbind(all_normals, face_normal)
-    }
     if (is.null(all_vertex_coords)) {
       all_vertex_coords <- vertex_coords
     } else {
@@ -726,7 +653,9 @@ read.fs.surface.stl.bin <- function(filepath, digits = 6L) {
     warning("Found non-zero face attribute count entries in file, ignored.") # nocov
   }
 
-  return(polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits))
+  mesh <- polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits);
+  mesh$metadata <- list("normals" = mesh.face.normals(mesh$vertices, mesh$faces));
+  return(mesh);
 }
 
 
@@ -788,11 +717,11 @@ stl.format.file.is.ascii <- function(filepath) {
 #'
 #' @param digits the precision (number of digits after decimal separator) to use when determining whether two x,y,z coords define the same vertex. This is used when the polygon soup is turned into an indexed mesh.
 #'
-#' @return an `fs.surface` instance. The normals are available in the 'metadata' property.
+#' @return an `fs.surface` instance. The normals of the faces are available in the 'metadata' property, in the entry 'normals' (a matrix with one row per face). Note that the normal vectors stored in the file are ignored, the returned normals are computed from the geometry, see \code{\link{mesh.face.normals}}.
 #'
 #' @references See https://en.wikipedia.org/wiki/STL_(file_format) for a format description.
 #'
-#' @note The STL format does not use indices into a vertex list to define faces, instead it repeats vertex coords in each face ('polygon soup'). Therefore, the mesh needs to be reconstructed, which requires the `misc3d` package.
+#' @note The STL format does not use indices into a vertex list to define faces, instead it repeats vertex coords in each face ('polygon soup'). Therefore, the mesh has to be reconstructed, which is what the internal function `polygon.soup.to.indexed.mesh` does.
 #'
 #' @keywords internal
 read.fs.surface.stl.ascii <- function(filepath, digits = 6L) {
@@ -809,19 +738,12 @@ read.fs.surface.stl.ascii <- function(filepath, digits = 6L) {
   line_idx <- 1L
   num_lines_left <- lines_total - line_idx
 
-  all_normals <- NULL
   all_vertex_coords <- NULL
 
   while (num_lines_left >= 7L) {
     face_info <- parse.stl.ascii.face(stl_lines[(line_idx + 1L):(line_idx + 7L)])
-    face_normal <- face_info$face_normal
     vertex_coords <- face_info$vertex_coords
 
-    if (is.null(all_normals)) {
-      all_normals <- face_normal
-    } else {
-      all_normals <- rbind(all_normals, face_normal)
-    }
     if (is.null(all_vertex_coords)) {
       all_vertex_coords <- vertex_coords
     } else {
@@ -840,7 +762,9 @@ read.fs.surface.stl.ascii <- function(filepath, digits = 6L) {
     }
   }
 
-  return(polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits))
+  mesh <- polygon.soup.to.indexed.mesh(all_vertex_coords, digits = digits);
+  mesh$metadata <- list("normals" = mesh.face.normals(mesh$vertices, mesh$faces));
+  return(mesh);
 }
 
 

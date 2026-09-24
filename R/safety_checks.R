@@ -36,26 +36,64 @@ get_max_alloc_bytes <- function() {
 }
 
 
+#' @title Format a number of bytes for human consumption.
+#'
+#' @description Used in the error messages of \code{validate_allocation_size},
+#'   so that sizes below one gigabyte stay readable. A limit of a few hundred
+#'   kilobytes would otherwise be reported as '0.00 GB', which is useless when
+#'   debugging a failed read.
+#'
+#' @param num_bytes single numeric value, the number of bytes.
+#'
+#' @return character string, the size with a unit.
+#'
+#' @keywords internal
+format_bytes_human <- function(num_bytes) {
+  if (is.infinite(num_bytes)) {
+    return("unlimited")
+  }
+  if (num_bytes >= 1e9) {
+    return(sprintf("%.2f GB", num_bytes / 1e9))
+  }
+  if (num_bytes >= 1e6) {
+    return(sprintf("%.2f MB", num_bytes / 1e6))
+  }
+  if (num_bytes >= 1e3) {
+    return(sprintf("%.2f KB", num_bytes / 1e3))
+  }
+  return(sprintf("%.0f bytes", num_bytes))
+}
+
+
 #' @title Validate that a requested allocation does not exceed the safety limit.
 #'
 #' @description Given dimension sizes and bytes per element, checks that the
 #'   total allocation size is safe. Catches negative/NA/Inf dimensions, integer
 #'   overflow (by converting to double), and enforces the max allocation limit.
 #'
+#'   Note that \code{bytes_per_elem} must be the size of an element *in memory*,
+#'   which is not necessarily the size on disk: \code{readBin()} into a
+#'   \code{numeric()} vector allocates 8 bytes per element even when the values
+#'   are stored as 4 byte floats.
+#'
 #' @param dims numeric vector of dimension sizes (e.g., \code{c(256, 256, 256)}).
 #'
 #' @param bytes_per_elem single numeric value, the number of bytes per element
-#'   (e.g., \code{4} for float32).
+#'   as stored in memory (e.g., \code{8} for a \code{numeric()} vector).
 #'
 #' @param max_bytes single numeric value, the maximum allowed allocation in bytes.
 #'   Defaults to the result of \code{get_max_alloc_bytes()}. Pass \code{Inf} to
 #'   disable the limit check (negative/NA/Inf dims are still rejected).
 #'
+#' @param label character string or NULL, a human-readable description of what
+#'   is being allocated. Included in the error message to help the user
+#'   understand which part of a file the limit was hit on.
+#'
 #' @return the total number of elements (as double), invisibly. The function
 #'   stops with an error if the allocation would be unsafe.
 #'
 #' @keywords internal
-validate_allocation_size <- function(dims, bytes_per_elem, max_bytes = get_max_alloc_bytes()) {
+validate_allocation_size <- function(dims, bytes_per_elem, max_bytes = get_max_alloc_bytes(), label = NULL) {
   if (!is.numeric(dims)) {
     stop("validate_allocation_size: 'dims' must be numeric.")
   }
@@ -79,10 +117,14 @@ validate_allocation_size <- function(dims, bytes_per_elem, max_bytes = get_max_a
   total_bytes <- total_elements * as.numeric(bytes_per_elem)
 
   if (is.finite(max_bytes) && total_bytes > max_bytes) {
+    what <- if (is.null(label)) "" else sprintf(" for %s", label)
     stop(sprintf(
-      "Requested allocation of %.1f MB exceeds the safety limit of %.1f MB.\n",
-      total_bytes / 1e6, max_bytes / 1e6
-    ), "Set a higher limit with: options(freesurferformats.max_alloc_bytes = <bytes>)\n",
+      "Requested allocation of %s%s exceeds the safety limit of %s.\n",
+      format_bytes_human(total_bytes), what, format_bytes_human(max_bytes)
+    ), "Note that this limit protects against running out of memory: if the data really is\n",
+    "  that large, then reading it into a single R object is likely to fail anyway. Consider\n",
+    "  reading only a subset (see the 'max_tracks' parameter of the track file readers).\n",
+    "Set a higher limit with: options(freesurferformats.max_alloc_bytes = <bytes>)\n",
     "  or set environment variable: FREESURFERFORMATS_MAX_ALLOC_BYTES=<bytes>\n",
     "  Use Inf to disable the limit.")
   }
