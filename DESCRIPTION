@@ -1,7 +1,7 @@
 Package: freesurferformats
 Type: Package
 Title: Read and Write 'FreeSurfer' Neuroimaging File Formats
-Version: 1.1.0
+Version: 1.1.2
 Authors@R: c(
     person("Tim", "Schäfer", role = c("aut", "cre"), email = "ts+code@rcmd.org", comment = c(ORCID = "0000-0002-3683-8070")),
     person("Van Essen Lab", role = "cph", comment = "Copyright holder of the Conte69 template and HCP group-average data files that can OPTIONALLY be downloaded via download_opt_data()."),
@@ -22,7 +22,7 @@ Suggests: knitr, rmarkdown, curl, testthat (>= 2.1.0), oro.nifti (>=
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-09-24 10:02:44 UTC; ts
+Packaged: 2026-10-20 12:14:08 UTC; ts
 Author: Tim Schäfer [aut, cre] (ORCID: <https://orcid.org/0000-0002-3683-8070>),
   Van Essen Lab [cph] (Copyright holder of the Conte69 template and HCP
     group-average data files that can OPTIONALLY be downloaded via
@@ -31,4 +31,4 @@ Author: Tim Schäfer [aut, cre] (ORCID: <https://orcid.org/0000-0002-3683-8070>)
     MNI152/avg152T1 template that can OPTIONALLY be downloaded via
     download_opt_data().)
 Repository: CRAN
-Date/Publication: 2026-09-24 18:00:02 UTC
+Date/Publication: 2026-10-20 13:50:09 UTC

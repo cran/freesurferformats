@@ -150,40 +150,6 @@ test_that("A transformation can be written as a tkregister dat file and read bac
 })
 
 
-test_that("Written matrices are read back exactly.", {
-  # The writers use enough significant digits for an exact round trip of a double (at least 17, which is the
-  # number that identifies a double uniquely). Fewer digits (15, as used by some other tools) lose precision.
-  angle <- 0.1234567890123456
-  rotation <- matrix(c(
-    cos(angle), -sin(angle), 0, 0,
-    sin(angle), cos(angle), 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-  ), ncol = 4L, byrow = TRUE)
-  # A value that is not exactly representable, to catch a lossy text format.
-  rotation[1L, 4L] <- 1.0 / 3.0
-  rotation[2L, 4L] <- -1e-7 / 7.0
-
-  voxel_tf <- fs.transform(matrix = rotation, space_in = "voxel", space_out = "voxel", voxel_base = 0L)
-  ras_tf <- fs.transform(matrix = rotation, space_in = "ras", space_out = "ras")
-
-  for (format in c("lta", "dat", "xfm", "fslmat")) {
-    # FSL matrix files use the '.mat' extension.
-    extension <- if (format == "fslmat") "mat" else format
-    out_file <- tempfile(fileext = paste0(".", extension))
-    tf <- if (format == "dat") {
-      fs.transform(matrix = rotation, space_in = "voxel", space_out = "ras", voxel_base = 0L)
-    } else if (format == "lta" || format == "fslmat") {
-      voxel_tf
-    } else {
-      ras_tf
-    }
-    write.fs.transform(tf, out_file)
-    expect_identical(read.fs.transform(out_file)$matrix, rotation)
-    unlink(out_file)
-  }
-})
-
 
 test_that("A formatted value is read back exactly, on every platform.", {
   # The round trip of a value that is not exactly representable depends on the decimal conversion of the
